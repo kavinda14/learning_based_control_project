@@ -1,0 +1,10 @@
+**/venv/
+**/.idea/
+
+**/cached_dir/
+**/model_dir/
+
+**/.pytest_cache/
+**/__pycache__/**
+
+/logs/
