@@ -1,11 +1,11 @@
-from SensorModel import SensorModel
-from Map import Map
-from Robot import Robot
-from Simulator import Simulator
-import NeuralNet
+import pickle
 import random
 import time
-import pickle
+
+from lbc.Grid import Map
+from lbc.Robot import Robot
+from lbc.SensorModel import SensorModel
+from lbc.Simulator import Simulator
 
 if __name__ == "__main__":
 
@@ -51,10 +51,10 @@ if __name__ == "__main__":
             path_matricies = sensor_model.get_final_path_matrices()
 
             final_partial_info = sensor_model.get_final_partial_info()
-            partial_info_binary_matrices = sensor_model.create_binary_matrices(final_partial_info)
+            partial_info_binary_matrices = create_binary_matrices(final_partial_info)
 
             final_actions = sensor_model.get_final_actions()
-            final_actions_binary_matrices = sensor_model.create_binary_matrices(final_actions)
+            final_actions_binary_matrices = create_binary_matrices(final_actions)
 
             final_scores = sensor_model.get_final_scores()
 

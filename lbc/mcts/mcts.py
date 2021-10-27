@@ -1,28 +1,26 @@
-'''
+"""
 Basic MCTS implementation
 Graeme Best
 Oregon State University
 Jan 2020
-'''
-
+"""
+from lbc.utils import cost
 from tree_node import TreeNode
 import reward
-from cost import cost
 from rollout import rollout
-from action import Action, printActionSequence
 import copy
 import random
 import math
 
 
-class State():
+class State:
     def __init__(self, action, location):
         self.action = action
         self.location = location
 
     def get_action(self):
         return self.action
-    
+
     def get_location(self):
         return self.location
 
@@ -41,9 +39,7 @@ def generate_valid_neighbors(current_state, state_sequence, robot):
     return neighbors
 
 
-# def mcts(action_set, budget, max_iterations, exploration_exploitation_parameter, robot, input_map):
 def mcts(budget, max_iterations, exploration_exploitation_parameter, robot, sensor_model):
-
     ################################
     # Setup
     # what is a sequence?
@@ -57,14 +53,14 @@ def mcts(budget, max_iterations, exploration_exploitation_parameter, robot, sens
     unpicked_child_actions = generate_valid_neighbors(start_sequence[0], start_sequence, robot)
     # unpicked_child_actions = copy.deepcopy(action_set)
     # root is created when mcts is run
-    root = TreeNode(parent=None, sequence=start_sequence, budget=budget, unpicked_child_actions=unpicked_child_actions, coords=robot.get_loc())
-    list_of_all_nodes = []
-    list_of_all_nodes.append(root) # for debugging only
+    root = TreeNode(parent=None, sequence=start_sequence, budget=budget, unpicked_child_actions=unpicked_child_actions,
+                    coords=robot.get_loc())
+    list_of_all_nodes = [root]
 
     ################################
     # Main loop
     # this determines the depth of the tree
-    for iter in range(max_iterations):
+    for idx in range(max_iterations):
 
         # print('Iteration: ', iter)
 
@@ -73,11 +69,11 @@ def mcts(budget, max_iterations, exploration_exploitation_parameter, robot, sens
         # move recursively down the tree from root
         # then add a new leaf node
         current = root
-        while True: 
+        while True:
 
             # Are there any children to be added here?
-            if current.unpicked_child_actions: # if not empty
-                
+            if current.unpicked_child_actions:  # if not empty
+
                 # does this mean that selection happens randomly?
 
                 # Pick one of the children that haven't been added
@@ -86,7 +82,7 @@ def mcts(budget, max_iterations, exploration_exploitation_parameter, robot, sens
                 if num_unpicked_child_actions == 1:
                     child_index = 0
                 else:
-                    child_index = random.randint(0,num_unpicked_child_actions-1)
+                    child_index = random.randint(0, num_unpicked_child_actions - 1)
                 child_action = current.unpicked_child_actions[child_index]
                 child_loc = child_action.get_location()
                 # print('child_loc: ', child_loc)
@@ -102,26 +98,24 @@ def mcts(budget, max_iterations, exploration_exploitation_parameter, robot, sens
                 # Setup the new child's unpicked children
                 # Remove any over budget children from this set
                 new_unpicked_child_actions = generate_valid_neighbors(child_action, new_sequence, robot)
-                def is_overbudget(a):
-                    seq_copy = copy.deepcopy(current.sequence)
-                    seq_copy.append(a)
-                    return cost(seq_copy) > budget
-                
+
                 # for the next node created, this adds actions to it only if there is budget left to do those actions
-                new_unpicked_child_actions = [a for a in new_unpicked_child_actions if not is_overbudget(a)]
+                new_unpicked_child_actions = [a for a in new_unpicked_child_actions
+                                              if not copy.deepcopy(current.sequence).append(a)]
 
                 # Create the new node and add it to the tree
                 # printActionSequence(new_sequence)
                 # EXPANSION
-                new_child_node = TreeNode(parent=current, sequence=new_sequence, budget=new_budget_left, unpicked_child_actions=new_unpicked_child_actions, coords=child_loc)
+                new_child_node = TreeNode(parent=current, sequence=new_sequence, budget=new_budget_left,
+                                          unpicked_child_actions=new_unpicked_child_actions, coords=child_loc)
                 current.children.append(new_child_node)
                 current = new_child_node
-                list_of_all_nodes.append(new_child_node) # for debugging only
+                list_of_all_nodes.append(new_child_node)  # for debugging only
 
-                break # don't go deeper in the tree...
+                break  # don't go deeper in the tree...
 
             else:
-                
+
                 # All possible children already exist
                 # Therefore recurse down the tree
                 # using the UCT selection policy
@@ -135,7 +129,8 @@ def mcts(budget, max_iterations, exploration_exploitation_parameter, robot, sens
 
                     # Define the UCB
                     def ucb(average, n_parent, n_child):
-                        return average + exploration_exploitation_parameter * math.sqrt( (2*math.log(n_parent)) / float(n_child) )
+                        return average + exploration_exploitation_parameter * math.sqrt(
+                            (2 * math.log(n_parent)) / float(n_child))
 
                     # Pick the child that maximises the UCB
                     n_parent = current.num_updates
@@ -162,10 +157,10 @@ def mcts(budget, max_iterations, exploration_exploitation_parameter, robot, sens
         # Back-propagation
         # update stats of all nodes from current back to root node
         parent = current
-        while parent: # is not None
+        while parent:  # is not None
 
             # Update the average
-            parent.updateAverage(rollout_reward)
+            parent.update_average(rollout_reward)
 
             # Recurse up the tree
             parent = parent.parent
@@ -175,27 +170,10 @@ def mcts(budget, max_iterations, exploration_exploitation_parameter, robot, sens
     # calculate best solution so far
     # by recursively choosing child with highest average reward
     current = root
-    # print('root :', current.get_children())
-    # for node in current.get_children():
-    #     print('child loc: ', node.get_coords())
-
-    # while current.children: # is not empty
-
-    #     # Find the child with best score
-    #     best_score = 0
-    #     best_child = -1
-    #     for child_idx in range(len(current.children)):
-    #         child = current.children[child_idx]
-    #         score = child.average_evaluation_score
-    #         if best_child == -1 or (score > best_score):
-    #             best_child = child
-    #             best_score = score
-
-    #     current = best_child
 
     best_score = 0
     best_child = -1
-    for child in current.children: # is not empty
+    for child in current.children:  # is not empty
 
         # Find the child with best score
         score = child.average_evaluation_score
@@ -207,6 +185,5 @@ def mcts(budget, max_iterations, exploration_exploitation_parameter, robot, sens
     solution = current.sequence
     winner_node = best_child
     winner_loc = winner_node.get_coords()
-
 
     return [solution, root, list_of_all_nodes, winner_node, winner_loc]

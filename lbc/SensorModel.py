@@ -1,6 +1,48 @@
-import math
 import numpy as np
-from numpy.lib.function_base import disp
+
+from lbc.utils import euclidean_distance
+
+
+def create_binary_matrices(input_list):
+    binary_matrices = list()
+
+    for main_matrix in input_list:
+
+        matrix_list = list()
+        n = 1
+
+        while n <= 3:
+            sub_matrix = np.empty((np.shape(main_matrix)), dtype=int)
+            for x in range(np.shape(main_matrix)[0]):
+                for y in range(np.shape(main_matrix)[1]):
+                    # obs_free
+                    if n == 1:
+                        if main_matrix[x, y] == 0:
+                            sub_matrix[x, y] = 1
+                        else:
+                            sub_matrix[x, y] = 0
+
+                    # obs_occupied
+                    if n == 2:
+                        if main_matrix[x, y] == 1:
+                            sub_matrix[x, y] = 1
+                        else:
+                            sub_matrix[x, y] = 0
+
+                    # unobs
+                    if n == 3:
+                        if main_matrix[x, y] == 2:
+                            sub_matrix[x, y] = 1
+                        else:
+                            sub_matrix[x, y] = 0
+
+            matrix_list.append(sub_matrix)
+            n += 1
+
+        binary_matrices.append(matrix_list)
+
+    return binary_matrices
+
 
 class SensorModel:
     def __init__(self, robot, world_map):
@@ -21,14 +63,14 @@ class SensorModel:
         # robot_loc = self.robot.get_loc()
 
         for o_loc in set(self.map.unobs_occupied):
-            distance = self.euclidean_distance(robot_loc , o_loc)
+            distance = euclidean_distance(robot_loc, o_loc)
             if distance <= self.sensing_range:
                 scanned_obstacles.add(o_loc)
                 if update_map:
                     self.map.unobs_occupied.remove(o_loc)
 
         for f_loc in set(self.map.unobs_free):
-            distance = self.euclidean_distance(robot_loc, f_loc)
+            distance = euclidean_distance(robot_loc, f_loc)
             if distance <= self.sensing_range:
                 scanned_free.add(f_loc)
                 if update_map:
@@ -53,12 +95,12 @@ class SensorModel:
 
         for unobs_occupied_loc in self.map.unobs_occupied:
             partial_info[unobs_occupied_loc] = 2
-        
+
         if update:
             self.final_partial_info.append(partial_info)
-        else: 
+        else:
             return partial_info
-    
+
     # update flag was added because when running greedy planner with NN, we want to get path but not update final list
     def create_final_path_matrix(self, update=True):
         bounds = self.map.get_bounds()
@@ -72,46 +114,6 @@ class SensorModel:
         else:
             return path_matrix
 
-    def create_binary_matrices(self, input_list):
-        binary_matrices = list()
-        
-        for main_matrix in input_list:
-
-            matrix_list = list()
-            n = 1
-
-            while (n <= 3):
-                sub_matrix = np.empty((np.shape(main_matrix)), dtype=int)
-                for x in range(np.shape(main_matrix)[0]):
-                    for y in range(np.shape(main_matrix)[1]):
-                        # obs_free
-                        if n == 1:
-                            if main_matrix[x, y] == 0:
-                                sub_matrix[x, y] = 1
-                            else:
-                                sub_matrix[x, y] = 0
-
-                        # obs_occupied
-                        if n == 2:
-                            if main_matrix[x, y] == 1:
-                                sub_matrix[x, y] = 1
-                            else:
-                                sub_matrix[x, y] = 0
-
-                        # unobs
-                        if n == 3:
-                            if main_matrix[x, y] == 2:
-                                sub_matrix[x, y] = 1
-                            else:
-                                sub_matrix[x, y] = 0
-                
-                matrix_list.append(sub_matrix)
-                n += 1
-
-            binary_matrices.append(matrix_list)
-        
-        return binary_matrices
-
     # greedy_planner flag is added because we need to return action matrix
     def create_action_matrix(self, action, greedy_planner=False):
         # Think of this as an action but a diff way of representing it
@@ -123,12 +125,12 @@ class SensorModel:
         # Get the mid-point of the matrix = [x/2, y/2]
         # Get displacement = mid-point - action_loc
         # Iterate through all the values of matrix1
-            # If coord + displacement is within bounds:
-                # matrix2[coord + displacement] = matrix1[coord]
+        # If coord + displacement is within bounds:
+        # matrix2[coord + displacement] = matrix1[coord]
 
         bounds = self.map.get_bounds()
         action_matrix = np.ones((bounds[0], bounds[1]), dtype=int)
-        mid_point = [bounds[0]//2, bounds[1]//2]
+        mid_point = [bounds[0] // 2, bounds[1] // 2]
         # Assumption is made that the action is valid
         action_loc = self.robot.get_action_loc(action)
 
@@ -139,7 +141,7 @@ class SensorModel:
         for x in range(len(partial_info)):
             if (x + displacement[0]) < bounds[0]:
                 for y in range(len(partial_info)):
-                    if (y + displacement[1] < bounds[1]):
+                    if y + displacement[1] < bounds[1]:
                         action_matrix[(x + displacement[0]), (y + displacement[1])] = partial_info[x, y]
 
         """"
@@ -163,7 +165,7 @@ class SensorModel:
         """
         if greedy_planner:
             return action_matrix
-            
+
         self.final_actions.append(action_matrix)
 
     def append_action_matrix(self, matrix):
@@ -190,23 +192,3 @@ class SensorModel:
 
     def get_final_path_matrices(self):
         return self.final_path_matrices
-
-    @staticmethod
-    def euclidean_distance(p1, p2):
-        x1 = p1[0]
-        y1 = p1[1]
-        x2 = p2[0]
-        y2 = p2[1]
-
-        return math.sqrt((y2-y1)**2 + (x2-x1)**2)
-
-
-# if __name__ == "__main__":
-
-#    mid_point = [2, 2]
-#    action_loc = [1, 1]
-   
-#    displacement = mid_point - action_loc
-#    print(displacement)
-
-
