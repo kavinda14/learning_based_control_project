@@ -1,12 +1,11 @@
-from SensorModel import SensorModel
-from Map import Map
-from Robot import Robot
-from Simulator import Simulator
 import copy
-import matplotlib.pyplot as plt
-import numpy as np
 import random as r
 import time as time
+
+from lbc.Grid import Map
+from lbc.Robot import Robot
+from lbc.SensorModel import SensorModel
+from lbc.Simulator import Simulator
 
 if __name__ == "__main__":
  

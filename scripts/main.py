@@ -1,33 +1,35 @@
-'''
+"""
 Basic MCTS implementation
 Graeme Best
 Oregon State University
 Jan 2020
-'''
+"""
 
-from mcts import mcts
-from action import Action, printActionSequence
-from tree_node import countNodes
-from plot_tree import plotTree
-import time, sys
+import sys
+import time
+
+from lbc.mcts.action import Action, print_action_sequence
+from lbc.mcts.mcts import mcts
+from scripts.plot_tree import plotTree
+
 
 def run():
     # Setup the problem
     num_actions = 3
     action_set = []
     for i in range(num_actions):
-        id = i
-        action_set.append(Action(id,i))
+        action_set.append(Action(i, i))
     budget = 7
-    
 
-    # Solve it with MCTS
-    exploration_exploitation_parameter = 0.8 # =1.0 is recommended. <1.0 more exploitation. >1.0 more exploration. 
+    # Solve it with ACTS
+    # =1.0 is recommended. <1.0 more exploitation. >1.0 more exploration
+    exploration_exploitation_parameter = 0.8
     max_iterations = 2000
-    [solution, root, list_of_all_nodes, winner] = mcts( action_set, budget, max_iterations, exploration_exploitation_parameter )
+    [solution, root, list_of_all_nodes, winner] = mcts(action_set, budget, max_iterations,
+                                                       exploration_exploitation_parameter)
 
     # Display the tree
-    printActionSequence(solution)
+    print_action_sequence(solution)
     plotTree(list_of_all_nodes, winner, action_set, False, budget, 1, exploration_exploitation_parameter)
     plotTree(list_of_all_nodes, winner, action_set, True, budget, 2, exploration_exploitation_parameter)
 
@@ -41,5 +43,3 @@ def run():
 
 if __name__ == "__main__":
     run()
-    
-    

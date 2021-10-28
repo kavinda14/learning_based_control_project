@@ -1,12 +1,9 @@
-import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-import sys
+import matplotlib.pyplot as plt
 
 import OraclePlanner
+from lbc.mcts import mcts
 
-sys.path.insert(0, './basic_MCTS_python')
-from basic_MCTS_python import mcts
-# from basic_MCTS_python import plot_tree
 
 class Simulator:
     def __init__(self, world_map, robot, sensor_model, planner):
@@ -47,20 +44,22 @@ class Simulator:
         self.iterations += 1
 
         # Generate an action from the robot path
-        # action = OraclePlanner.random_planner(self.robot)
         if self.planner == "random":
             action = OraclePlanner.random_planner(self.robot, self.sensor_model)
-        if self.planner == "greedy":
+        elif self.planner == "greedy":
             action = OraclePlanner.greedy_planner(self.robot, self.sensor_model, self.map)
-        if self.planner == "network":
+        elif self.planner == "network":
             action = OraclePlanner.greedy_planner(self.robot, self.sensor_model, self.map, True)
-        if self.planner == 'mcts':
+        elif self.planner == 'mcts':
             budget = 7
             max_iterations = 200
-            exploration_exploitation_parameter = 0.8 # =1.0 is recommended. <1.0 more exploitation. >1.0 more exploration. 
-            solution, root, list_of_all_nodes, winner_node, winner_loc = mcts.mcts(budget, max_iterations, exploration_exploitation_parameter, self.robot, self.sensor_model)
+            # =1.0 is recommended. <1.0 more exploitation. >1.0 more exploration
+            exploration_exploitation_parameter = 0.8
+            solution, root, list_of_all_nodes, winner_node, winner_loc = mcts.mcts(
+                budget, max_iterations, exploration_exploitation_parameter, self.robot, self.sensor_model)
             action = self.robot.get_direction(self.robot.get_loc(), winner_loc)
-
+        else:
+            action = OraclePlanner.random_planner(self.robot, self.sensor_model)
 
         self.actions.append(action)
         # print("sensor path: ", self.sensor_model.get_final_path())
@@ -80,7 +79,8 @@ class Simulator:
             self.visualize()
 
         # Score is calculated in _update function.
-        # It needs to be reset otherwise the score will carry on to the next iteration even if no new obstacles were scanned.
+        # It needs to be reset otherwise the score will carry on to the next iteration
+        # even if no new obstacles were scanned.
         self.reset_score()
 
         # End when all objects have been observed OR 1,000 iterations
@@ -161,6 +161,4 @@ class Simulator:
             y_values.append(path[1] + 0.5)
 
         plt.plot(x_values, y_values)
-
-
         plt.show()

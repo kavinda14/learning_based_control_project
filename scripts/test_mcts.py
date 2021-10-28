@@ -1,17 +1,14 @@
-from SensorModel import SensorModel
-from Map import Map
-from Robot import Robot
-from Simulator import Simulator
 import copy
-import matplotlib.pyplot as plt
 import random as r
-import time as time
 import sys
-sys.path.insert(0, './basic_MCTS_python')
-from basic_MCTS_python import mcts
-from basic_MCTS_python import plot_tree
 
+from lbc.Grid import Map
+from lbc.Robot import Robot
+from lbc.SensorModel import SensorModel
+from lbc.Simulator import Simulator
 
+sys.path.insert(0, '../lbc/mcts')
+from lbc.mcts import mcts
 
 if __name__ == "__main__":
  
