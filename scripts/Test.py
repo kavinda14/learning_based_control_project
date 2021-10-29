@@ -2,18 +2,16 @@ import copy
 import random as r
 import time as time
 
-from lbc.Grid import Map
+from lbc.Grid import Grid
 from lbc.Robot import Robot
 from lbc.SensorModel import SensorModel
 from lbc.Simulator import Simulator
 
 if __name__ == "__main__":
- 
     # Bounds need to be an odd number for the action to always be in the middle
     # planner_options = ["random", "greedy", "network", "mcts"]
     planner_options = ["mcts"]
     # planner_options = ["network"]
-    # bounds = [21, 21]
     bounds = [21, 21]
     random = list()
     greedy = list()
@@ -25,7 +23,7 @@ if __name__ == "__main__":
     for i in range(trials):
         print("Trial no: {}".format(i))
         x1.append(i)
-        map = Map(bounds, 7, (), False)
+        map = Grid(bounds, 7, (), False)
         unobs_occupied = copy.deepcopy(map.get_unobs_occupied())
 
         valid_starting_loc = False
@@ -34,7 +32,7 @@ if __name__ == "__main__":
             y = r.randint(0, bounds[0]-1)
             valid_starting_loc = map.check_loc(x, y) 
         for planner in planner_options:     
-            map = Map(bounds, 18, copy.deepcopy(unobs_occupied), True)
+            map = Grid(bounds, 18, copy.deepcopy(unobs_occupied), True)
             robot = Robot(x, y, bounds, map)
             sensor_model = SensorModel(robot, map)
             start = time.time()
@@ -73,5 +71,3 @@ if __name__ == "__main__":
     # plt.legend()
     # # Display a figure.
     # plt.show()
-
-

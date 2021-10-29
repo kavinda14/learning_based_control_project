@@ -1,5 +1,5 @@
 from lbc.SensorModel import SensorModel
-from lbc.Grid import Map
+from lbc.Grid import Grid
 from lbc.Robot import Robot
 from lbc.Simulator import Simulator
 from lbc import NeuralNet
@@ -20,7 +20,7 @@ if __name__ == "__main__":
             start = time.time()
             # Bounds need to be an odd number for the action to always be in the middle
             bounds = [21, 21]
-            map = Map(bounds, 18)
+            map = Grid(bounds, 18)
 
             # Selects random starting locations for the robot
             # We can't use 111 due to the limits we create in checking valid location functions
