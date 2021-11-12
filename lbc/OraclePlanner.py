@@ -1,6 +1,7 @@
 import random
 import torch
-import NeuralNet
+
+from lbc import NeuralNet
 
 
 def random_planner(robot, sensor_model):

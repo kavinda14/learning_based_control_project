@@ -1,44 +1,39 @@
 import copy
-import random as r
 import time as time
 
-from lbc.Grid import Map
+from lbc.Grid import Grid
 from lbc.Robot import Robot
 from lbc.SensorModel import SensorModel
 from lbc.Simulator import Simulator
 
 if __name__ == "__main__":
- 
     # Bounds need to be an odd number for the action to always be in the middle
-    # planner_options = ["random", "greedy", "network", "mcts"]
-    planner_options = ["mcts"]
-    # planner_options = ["network"]
-    # bounds = [21, 21]
+    planner_options = [
+        "random",
+        # "greedy",
+        # "network",
+        # "mcts"
+    ]
     bounds = [21, 21]
+    max_trials = 200
     random = list()
     greedy = list()
     network = list()
     x1 = list()
 
-    # trials = 200
-    trials = 1
-    for i in range(trials):
-        print("Trial no: {}".format(i))
-        x1.append(i)
-        map = Map(bounds, 7, (), False)
-        unobs_occupied = copy.deepcopy(map.get_unobs_occupied())
+    for trial_idx in range(max_trials):
+        print("Trial no: {}".format(trial_idx))
+        x1.append(trial_idx)
+        grid = Grid(bounds, 7, (), False)
+        unobs_occupied = copy.deepcopy(grid.get_unobs_occupied())
 
-        valid_starting_loc = False
-        while not valid_starting_loc:
-            x = r.randint(0, bounds[0]-1)
-            y = r.randint(0, bounds[0]-1)
-            valid_starting_loc = map.check_loc(x, y) 
+        x_start, y_start = grid.random_loc()
         for planner in planner_options:     
-            map = Map(bounds, 18, copy.deepcopy(unobs_occupied), True)
-            robot = Robot(x, y, bounds, map)
-            sensor_model = SensorModel(robot, map)
+            grid = Grid(bounds, 18, copy.deepcopy(unobs_occupied), True)
+            robot = Robot(x_start, y_start, bounds, grid)
+            sensor_model = SensorModel(robot, grid)
             start = time.time()
-            simulator = Simulator(map, robot, sensor_model, planner)
+            simulator = Simulator(grid, robot, sensor_model, planner)
             simulator.visualize()
             simulator.run(50, False)
             end = time.time()
@@ -59,19 +54,3 @@ if __name__ == "__main__":
     # avg_random = sum(random)/trials
     # avg_greedy = sum(greedy)/trials
     # avg_network = sum(network)/trials
-
-    # plt.plot(x1, random, label = "random")
-    # plt.plot(x1, greedy, label = "greedy")
-    # plt.plot(x1, network, label = "network")
-
-    # plt.xlabel('Trial no')
-    # # Set the y axis label of the current axis.
-    # plt.ylabel('Score')
-    # # Set a title of the current axes.
-    # plt.title('Avg scores: random: {}, greedy: {}, network: {}'.format(avg_random, avg_greedy, avg_network))
-    # # show a legend on the plot
-    # plt.legend()
-    # # Display a figure.
-    # plt.show()
-
-

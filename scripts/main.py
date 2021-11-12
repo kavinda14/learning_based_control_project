@@ -10,7 +10,7 @@ import time
 
 from lbc.mcts.action import Action, print_action_sequence
 from lbc.mcts.mcts import mcts
-from scripts.plot_tree import plotTree
+from scripts.plot_tree import plot_tree
 
 
 def run():
@@ -30,8 +30,8 @@ def run():
 
     # Display the tree
     print_action_sequence(solution)
-    plotTree(list_of_all_nodes, winner, action_set, False, budget, 1, exploration_exploitation_parameter)
-    plotTree(list_of_all_nodes, winner, action_set, True, budget, 2, exploration_exploitation_parameter)
+    plot_tree(list_of_all_nodes, winner, action_set, False, budget, 1, exploration_exploitation_parameter)
+    plot_tree(list_of_all_nodes, winner, action_set, True, budget, 2, exploration_exploitation_parameter)
 
     # Wait for Ctrl+C
     while True:

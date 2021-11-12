@@ -1,11 +1,12 @@
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 
-import OraclePlanner
+from lbc import OraclePlanner
 from lbc.mcts import mcts
 
 
 class Simulator:
+
     def __init__(self, world_map, robot, sensor_model, planner):
         """
         Inputs:

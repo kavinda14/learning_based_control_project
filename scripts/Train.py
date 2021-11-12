@@ -1,12 +1,13 @@
-from lbc.SensorModel import SensorModel
-from lbc.Grid import Map
-from lbc.Robot import Robot
-from lbc.Simulator import Simulator
-from lbc import NeuralNet
-import random
 import time
 
+from lbc import NeuralNet
+from lbc.Grid import Grid
+from lbc.Robot import Robot
+from lbc.SensorModel import SensorModel
+from lbc.Simulator import Simulator
+
 if __name__ == "__main__":
+    bounds = [21, 21]
 
     input_partial_info_binary_matrices = list()
     input_path_matrices = list()
@@ -19,21 +20,16 @@ if __name__ == "__main__":
         for planner in planner_options: 
             start = time.time()
             # Bounds need to be an odd number for the action to always be in the middle
-            bounds = [21, 21]
-            map = Map(bounds, 18)
+            grid = Grid(bounds, 18, [])
 
             # Selects random starting locations for the robot
             # We can't use 111 due to the limits we create in checking valid location functions
-            valid_starting_loc = False
-            while not valid_starting_loc:
-                x = random.randint(0, bounds[0])
-                y = random.randint(0, bounds[1])
-                valid_starting_loc = map.check_loc(x, y) 
+            starting_loc = grid.random_loc()
 
-            robot = Robot(x, y, bounds, map)
-            sensor_model = SensorModel(robot, map)
+            robot = Robot(starting_loc[0], starting_loc[1], bounds, grid)
+            sensor_model = SensorModel(robot, grid)
             
-            simulator = Simulator(map, robot, sensor_model, planner)
+            simulator = Simulator(grid, robot, sensor_model, planner)
             simulator.run(5000, False)
 
             # simulator.visualize()

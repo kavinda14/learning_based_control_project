@@ -4,13 +4,14 @@ Graeme Best
 Oregon State University
 Jan 2020
 """
-from lbc.utils import cost
-from tree_node import TreeNode
-import reward
-from rollout import rollout
 import copy
 import random
 import math
+
+from lbc.mcts import reward
+from lbc.mcts.rollout import rollout
+from lbc.mcts.tree_node import TreeNode
+from lbc.utils import cost
 
 
 class State:

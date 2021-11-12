@@ -1,5 +1,10 @@
+"""
+
+"""
+
 class Robot:
-    def __init__(self, x, y, bounds, map):
+
+    def __init__(self, x, y, bounds, grid):
         # Variables that changes
         self.x_loc = x
         self.y_loc = y
@@ -13,7 +18,7 @@ class Robot:
         self.sensing_range = 2.85  # Range for square with bounds 21, 21
         # self.sensing_range = 4.3 # Range for circles with bounds 41, 41
         self.lim = bounds
-        self.map = map
+        self.grid = grid
 
     def reset_robot(self):
         self.x_loc = self.start_loc[0]
@@ -27,12 +32,12 @@ class Robot:
         in_bounds = (0 <= x <= self.lim[0] and 0 <= y <= self.lim[1])
 
         # Check if new location is intersecting with obstacles from map
-        for loc in self.map.unobs_occupied:
+        for loc in self.grid.unobs_occupied:
             if x == loc[0] and y == loc[1]:
                 print("Invalid Location {}".format(loc))
                 return False
 
-        for loc in self.map.obs_occupied:
+        for loc in self.grid.obs_occupied:
             if x == loc[0] and y == loc[1]:
                 print("Invalid Location {}".format(loc))
                 return False
@@ -45,11 +50,11 @@ class Robot:
         in_bounds = (0 <= x < self.lim[0] and 0 <= y < self.lim[1])
 
         # Check unobs_occupied and obs_occupied from map
-        for loc in self.map.unobs_occupied:
+        for loc in self.grid.unobs_occupied:
             if x == loc[0] and y == loc[1]:
                 return False
 
-        for loc in self.map.obs_occupied:
+        for loc in self.grid.obs_occupied:
             if x == loc[0] and y == loc[1]:
                 return False
 

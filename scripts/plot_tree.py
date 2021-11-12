@@ -3,7 +3,6 @@ import math
 import matplotlib.pyplot as plt
 
 
-# def plotTree(list_of_all_nodes, winner, action_set, use_UCT, budget, fig_num, exploration_exploitation_parameter):
 def plot_tree(list_of_all_nodes, winner, use_UCT, budget, fig_num, exploration_exploitation_parameter):
     def ucb(average, n_parent, n_child):
         return average + exploration_exploitation_parameter * math.sqrt((2 * math.log(n_parent)) / float(n_child))

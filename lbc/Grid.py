@@ -1,9 +1,12 @@
+import random
+
 import numpy as np
 
 from lbc.utils import euclidean_distance
 
 
-class Map:
+class Grid:
+
     def __init__(self, bounds, num_obstacles, unobs_occupied_set, given=False):
         """
         Inputs:
@@ -63,6 +66,7 @@ class Map:
 
         self.reset_unobs_free = set(self.unobs_free)
         self.reset_unobs_occupied = set(self.unobs_occupied)
+        return
 
     # This was written to select random starting locations for training
     def check_loc(self, x_loc, y_loc):
@@ -81,10 +85,19 @@ class Map:
 
         return in_bounds
 
+    def random_loc(self):
+        rand_x = random.randint(0, self.bounds[0] - 1)
+        rand_y = random.randint(0, self.bounds[1] - 1)
+        while not self.check_loc(rand_x, rand_y):
+            rand_x = random.randint(0, self.bounds[0] - 1)
+            rand_y = random.randint(0, self.bounds[1] - 1)
+        return rand_x, rand_y
+
     # Function is used in testing because we need to keep the same map to make it fair
     def reset_map(self):
         self.obs_occupied = set()
         self.obs_free = set()
+        return
 
     def get_unobs_free(self):
         return self.unobs_free
@@ -94,9 +107,11 @@ class Map:
 
     def set_unobs_free(self, unobs_free_set):
         self.unobs_free = unobs_free_set
+        return
 
     def set_unobs_occupied(self, unobs_occupied_set):
         self.unobs_occupied = unobs_occupied_set
+        return
 
     def get_bounds(self):
         return self.bounds
