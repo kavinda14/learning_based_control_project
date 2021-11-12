@@ -18,11 +18,11 @@ def random_planner(robot, sensor_model):
         times_visited = sensor_model.get_final_path().count(tuple(robot.get_action_loc(action)))
         robot_loc_debug = robot.get_loc()
         action_loc_debug = robot.get_action_loc(action)
+        visited_before = False
         if times_visited > 1:  # This means that the same action is allowed x + 1 times
             visited_before = True
-        else:
-            visited_before = False
-        if valid_move == True and visited_before == False:
+
+        if valid_move and visited_before:
             break
         if counter > 10:
             # if counter > 100:
@@ -41,7 +41,7 @@ def greedy_planner(robot, sensor_model, grid, neural_net=False):
     best_action_score = float('-inf')
     counter = 0
 
-    model = NeuralNet.Net(grid.get_bounds())
+    model = NeuralNet.Net(grid.bounds)
     # todo generalize path
     model.load_state_dict(torch.load("/home/kavi/thesis/neural_net_weights/circles_random_21x21"))
     model.eval()

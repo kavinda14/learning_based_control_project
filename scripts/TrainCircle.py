@@ -10,20 +10,20 @@ from lbc.Simulator import Simulator
 if __name__ == "__main__":
     bounds = [21, 21]
 
-    input_partial_info_binary_matrices = list()
-    in_path_mats = list()
-    input_actions_binary_matrices = list()
-    input_scores = list()
+    input_partial_info_binary_matrices = []
+    input_path_matrices = []
+    input_actions_binary_matrices = []
+    input_scores = []
 
     planner_options = [
         "random",
         # "greedy",
     ]
 
-    input_partial_info_binary_matrices_pickle = open("input_partial_info_binary_matrices_pickle", "wb")
-    input_path_matrices_pickle = open("input_path_matrices_pickle", "wb")
-    input_actions_binary_matrices_pickle = open("input_actions_binary_matrices_pickle", "wb")
-    input_scores_pickle = open("input_scores_pickle", "wb")
+    partial_info_binary_mats = open("input_partial_info_binary_matrices_pickle", "wb")
+    orig_path_mats = open("input_path_matrices_pickle", "wb")
+    actions_binary_mats = open("input_actions_binary_matrices_pickle", "wb")
+    scores = open("input_scores_pickle", "wb")
 
     for i in range(45):
         for planner in planner_options:
@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
             final_scores = sensor_model.get_final_scores()
 
-            in_path_mats = in_path_mats + path_mats
+            orig_path_mats = orig_path_mats + path_mats
             input_partial_info_binary_matrices = input_partial_info_binary_matrices + partial_info_binary_matrices
             input_actions_binary_matrices = input_actions_binary_matrices + final_actions_binary_matrices
             input_scores = input_scores + final_scores
@@ -67,7 +67,7 @@ if __name__ == "__main__":
             time_taken = (end - start) / 60
             print("Iteration: {}, Planner: {}, Time taken: {:.3f}".format(i, planner, time_taken))
 
-    print("final_path_matrices: ", len(in_path_mats))
+    print("final_path_matrices: ", len(orig_path_mats))
     print("final_partial_info_binary_matrices: ", len(input_partial_info_binary_matrices))
     print("final_final_actions_binary_matrices", len(input_actions_binary_matrices))
     print("final_final_scores: ", len(input_scores))
@@ -77,6 +77,6 @@ if __name__ == "__main__":
     print(len(current_score))
 
     # ### Train network
-    data = NeuralNet.dataset_generator(input_partial_info_binary_matrices, in_path_mats,
+    data = NeuralNet.dataset_generator(input_partial_info_binary_matrices, orig_path_mats,
                                        input_actions_binary_matrices, input_scores)
     NeuralNet.run_network(data, bounds)

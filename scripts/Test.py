@@ -25,10 +25,10 @@ if __name__ == "__main__":
         print("Trial no: {}".format(trial_idx))
         x1.append(trial_idx)
         grid = Grid(bounds, 7, (), False)
-        unobs_occupied = copy.deepcopy(grid.get_unobs_occupied())
+        unobs_occupied = copy.deepcopy(grid.unobs_occupied)
 
         x_start, y_start = grid.random_loc()
-        for planner in planner_options:     
+        for planner in planner_options:
             grid = Grid(bounds, 18, copy.deepcopy(unobs_occupied), True)
             robot = Robot(x_start, y_start, bounds, grid)
             sensor_model = SensorModel(robot, grid)

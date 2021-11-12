@@ -8,24 +8,23 @@ from lbc.Simulator import Simulator
 from lbc.mcts import mcts
 
 if __name__ == "__main__":
- 
     # Bounds need to be an odd number for the action to always be in the middle
     bounds = [21, 21]
 
-    map = Grid(bounds, 7, (), False)
-    unobs_occupied = copy.deepcopy(map.get_unobs_occupied())
+    grid = Grid(bounds, 7, (), False)
+    unobs_occupied = copy.deepcopy(grid.unobs_occupied)
 
     valid_starting_loc = False
     while not valid_starting_loc:
-        x = r.randint(0, bounds[0]-1)
-        y = r.randint(0, bounds[0]-1)
-        valid_starting_loc = map.check_loc(x, y) 
+        x = r.randint(0, bounds[0] - 1)
+        y = r.randint(0, bounds[0] - 1)
+        valid_starting_loc = grid.check_loc(x, y)
 
-    map = Grid(bounds, 18, copy.deepcopy(unobs_occupied), True)
-    robot = Robot(x, y, bounds, map)
-    
-    sensor_model = SensorModel(robot, map)
-    simulator = Simulator(map, robot, sensor_model, 'greedy')
+    grid = Grid(bounds, 18, copy.deepcopy(unobs_occupied), True)
+    starting_loc = grid.random_loc()
+    robot = Robot(starting_loc[0], starting_loc[1], bounds, grid)
+    sensor_model = SensorModel(robot, grid)
+    simulator = Simulator(grid, robot, sensor_model, 'greedy')
     # simulator.visualize()
 
     # Setup the problem
@@ -36,15 +35,17 @@ if __name__ == "__main__":
     #     action_set.append(Action(id,i))
     budget = 7
 
-    exploration_exploitation_parameter = 0.8 # =1.0 is recommended. <1.0 more exploitation. >1.0 more exploration. 
+    exploration_exploitation_parameter = 0.8  # =1.0 is recommended. <1.0 more exploitation. >1.0 more exploration.
     max_iterations = 20
-    
-    print('robot loc: ', [x, y])
+
+    print('robot loc: ', starting_loc)
     robot_move = -1
     for i in range(100):
-        current_loc = robot.get_loc() 
+        current_loc = robot.get_loc()
         # print('current_loc: ', current_loc)
-        [solution, root, list_of_all_nodes, winner_node, winner_loc] = mcts.mcts(budget, max_iterations, exploration_exploitation_parameter, robot, sensor_model)
+        [solution, root, list_of_all_nodes, winner_node, winner_loc] = mcts.mcts(budget, max_iterations,
+                                                                                 exploration_exploitation_parameter,
+                                                                                 robot, sensor_model)
         next_loc = winner_node.get_coords()
         # print('next_loc: ', next_loc)
         direction = robot.get_direction(current_loc, next_loc)
@@ -55,10 +56,3 @@ if __name__ == "__main__":
     # simulator.visualize()
 
     # print('winner: ', winner.get_coords())
-
-    # plot_tree.plotTree(list_of_all_nodes, winner, False, budget, 1, exploration_exploitation_parameter)
-    # plot_tree.plotTree(list_of_all_nodes, winner, True, budget, 2, exploration_exploitation_parameter)
-    
-  
-
-

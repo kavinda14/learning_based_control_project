@@ -10,7 +10,7 @@ import time
 
 from lbc.mcts.action import Action, print_action_sequence
 from lbc.mcts.mcts import mcts
-from scripts.plot_tree import plot_tree
+from wtf.plot_tree import plot_tree
 
 
 def run():
@@ -25,8 +25,8 @@ def run():
     # =1.0 is recommended. <1.0 more exploitation. >1.0 more exploration
     exploration_exploitation_parameter = 0.8
     max_iterations = 2000
-    [solution, root, list_of_all_nodes, winner] = mcts(action_set, budget, max_iterations,
-                                                       exploration_exploitation_parameter)
+    [solution, root, list_of_all_nodes, winner] = mcts(
+        action_set, budget, max_iterations, exploration_exploitation_parameter)
 
     # Display the tree
     print_action_sequence(solution)

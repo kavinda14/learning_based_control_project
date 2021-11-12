@@ -3,7 +3,7 @@ import time
 from lbc import NeuralNet
 from lbc.Grid import Grid
 from lbc.Robot import Robot
-from lbc.SensorModel import SensorModel
+from lbc.SensorModel import SensorModel, create_binary_matrices
 from lbc.Simulator import Simulator
 
 if __name__ == "__main__":
@@ -25,7 +25,6 @@ if __name__ == "__main__":
             # Selects random starting locations for the robot
             # We can't use 111 due to the limits we create in checking valid location functions
             starting_loc = grid.random_loc()
-
             robot = Robot(starting_loc[0], starting_loc[1], bounds, grid)
             sensor_model = SensorModel(robot, grid)
             
@@ -33,8 +32,7 @@ if __name__ == "__main__":
             simulator.run(5000, False)
 
             # simulator.visualize()
-            
-            ### Training data
+            # Training data
             path_matricies = sensor_model.get_final_path_matrices()
 
             final_partial_info = sensor_model.get_final_partial_info()
@@ -60,9 +58,6 @@ if __name__ == "__main__":
     print("final_final_actions_binary_matrices", len(input_actions_binary_matrices))
     print("final_final_scores: ", len(input_scores))
     
-    ### Train network
+    # Train network
     data = NeuralNet.dataset_generator(input_partial_info_binary_matrices, input_path_matrices, input_actions_binary_matrices, input_scores)
     NeuralNet.run_network(data, bounds)
-
-
-

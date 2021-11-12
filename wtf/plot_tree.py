@@ -94,7 +94,6 @@ def get_position(seq, n):
 
     for i in range(len(seq)):
         pos = max(((-eps / maxn) * i + eps), 1) * (pos + scramble(seq[i].name, n) * math.pow(n, -i))
-
     return -pos
 
 
