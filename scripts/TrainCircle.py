@@ -1,7 +1,8 @@
 import pickle
 import time
+from pathlib import Path
 
-from lbc import NeuralNet
+from lbc import NeuralNet, project_properties
 from lbc.Grid import Grid
 from lbc.Robot import Robot
 from lbc.SensorModel import SensorModel, create_binary_matrices
@@ -20,10 +21,10 @@ if __name__ == "__main__":
         # "greedy",
     ]
 
-    partial_info_binary_mats = open("input_partial_info_binary_matrices_pickle", "wb")
-    orig_path_mats = open("input_path_matrices_pickle", "wb")
-    actions_binary_mats = open("input_actions_binary_matrices_pickle", "wb")
-    scores = open("input_scores_pickle", "wb")
+    partial_info_binary_mats = open(Path(project_properties.cached_dir, "input_partial_info_binary_matrices_pickle"), "wb")
+    orig_path_mats = open(Path(project_properties.cached_dir, "input_path_matrices_pickle"), "wb")
+    actions_binary_mats = open(Path(project_properties.cached_dir, "input_actions_binary_matrices_pickle"), "wb")
+    scores = open(Path(project_properties.cached_dir, "input_scores_pickle"), "wb")
 
     for i in range(45):
         for planner in planner_options:

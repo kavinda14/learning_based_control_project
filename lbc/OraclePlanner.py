@@ -32,7 +32,6 @@ def random_planner(robot, sensor_model):
 
 
 def greedy_planner(robot, sensor_model, grid, neural_net=False):
-    # actions = ['left', 'right', 'backward', 'forward']
     actions = ['left', 'backward', 'right', 'forward']
     # actions = ['backward', 'forward']
     # best_action = random_planner(robot, sensor_model)

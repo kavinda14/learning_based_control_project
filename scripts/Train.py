@@ -8,14 +8,16 @@ from lbc.Simulator import Simulator
 
 if __name__ == "__main__":
     bounds = [21, 21]
+    planner_options = [
+        "random",
+        "greedy"
+    ]
 
     input_partial_info_binary_matrices = list()
     input_path_matrices = list()
     input_actions_binary_matrices = list()
     input_scores = list()
 
-    # planner_options = ["random", "greedy"]
-    planner_options = ["random"]
     for i in range(50):
         for planner in planner_options: 
             start = time.time()
@@ -33,7 +35,7 @@ if __name__ == "__main__":
 
             # simulator.visualize()
             # Training data
-            path_matricies = sensor_model.get_final_path_matrices()
+            path_mats = sensor_model.get_final_path_matrices()
 
             final_partial_info = sensor_model.get_final_partial_info()
             partial_info_binary_matrices = create_binary_matrices(final_partial_info)
@@ -43,7 +45,7 @@ if __name__ == "__main__":
 
             final_scores = sensor_model.get_final_scores()
 
-            input_path_matrices = input_path_matrices + path_matricies
+            input_path_matrices = input_path_matrices + path_mats
             input_partial_info_binary_matrices = input_partial_info_binary_matrices + partial_info_binary_matrices
             input_actions_binary_matrices = input_actions_binary_matrices + final_actions_binary_matrices
             input_scores = input_scores + final_scores

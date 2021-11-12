@@ -12,3 +12,4 @@
 # Don't track the content of these folders:
 __pycache__/
 .vscode/
+/cache/
