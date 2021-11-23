@@ -4,8 +4,7 @@ game of attrition and attack - see page 97 of Isaacs book
 import numpy as np
 
 from lbc import plotter
-from lbc.problems.problem import Problem
-from lbc.util import sample_vector, contains
+from lbc.problems.problem import Problem, contains, sample_vector
 
 
 class Example5(Problem):

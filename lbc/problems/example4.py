@@ -4,8 +4,7 @@
 import numpy as np
 
 from lbc import plotter
-from lbc.problems.problem import Problem
-from lbc.util import contains
+from lbc.problems.problem import Problem, contains
 
 
 class Example4(Problem):

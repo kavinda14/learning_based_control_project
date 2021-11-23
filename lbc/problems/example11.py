@@ -6,8 +6,7 @@ import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 
 from lbc import plotter
-from lbc.problems.problem import Problem
-from lbc.util import sample_vector, contains
+from lbc.problems.problem import Problem, contains
 
 
 class Example11(Problem):

@@ -11,8 +11,8 @@ from tqdm import tqdm
 
 from lbc import plotter
 from lbc.learning.oracles import get_oracles
-from lbc.problems.utils import get_solver, get_problem
-from lbc.util import init_tqdm, update_tqdm, get_temp_fn, get_dataset_fn, write_dataset, get_oracle_fn, format_dir
+from lbc.util import init_tqdm, update_tqdm, get_temp_fn, get_dataset_fn, write_dataset, get_oracle_fn, format_dir, \
+    get_problem, get_solver
 from lbc.scripts.run import run_instance
 
 num_simulations = 2000

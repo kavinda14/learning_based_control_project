@@ -11,6 +11,7 @@ class MCTS(Solver):
 
     def __init__(self):
         super(MCTS, self).__init__()
+        self.solver_name = 'mcts'
         self.search_depth = 10
         self.number_simulations = 100
 

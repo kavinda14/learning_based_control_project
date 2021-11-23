@@ -12,8 +12,8 @@ from tqdm import tqdm
 
 from lbc import plotter
 from lbc.learning.oracles import get_oracles
-from lbc.problems.utils import get_solver, get_problem
-from lbc.util import get_dataset_fn, write_dataset, get_oracle_fn, format_dir, init_tqdm, update_tqdm
+from lbc.util import get_dataset_fn, write_dataset, get_oracle_fn, format_dir, init_tqdm, update_tqdm, get_solver, \
+    get_problem
 
 parallel_on = True
 

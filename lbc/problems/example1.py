@@ -6,8 +6,7 @@ import matplotlib.pyplot as plt
 
 
 from lbc import plotter
-from lbc.problems.problem import Problem
-from lbc.util import contains
+from lbc.problems.problem import Problem, contains
 
 
 class Example1(Problem):

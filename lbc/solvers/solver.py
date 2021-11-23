@@ -1,7 +1,7 @@
 class Solver:
 
     def __init__(self):
-        pass
+        self.solver_name = 'Solver'
 
     def policy(self, problem, state):
         # output:
