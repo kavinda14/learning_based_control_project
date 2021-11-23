@@ -6,8 +6,7 @@ from queue import Queue
 from lbc import plotter
 from lbc.learning.oracles import get_oracles
 from lbc.param import Param
-from lbc.problems.problem import get_problem
-from lbc.solvers.solver import get_solver
+from lbc.problems.utils import get_solver, get_problem
 from lbc.util import init_tqdm, update_tqdm
 
 

@@ -14,7 +14,7 @@ from lbc.learning.oracles import get_oracles
 from lbc.problems.problem import get_problem
 from lbc.solvers.solver import get_solver
 from lbc.util import init_tqdm, update_tqdm, get_temp_fn, get_dataset_fn, write_dataset, get_oracle_fn, format_dir
-from lbc.scripts.run import run_instance
+from lbc.run import run_instance
 
 num_simulations = 2000
 search_depth = 100
