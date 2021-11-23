@@ -2,7 +2,7 @@ import time
 
 from lbc import plotter
 from lbc.param import Param
-from lbc.run import make_instance, run_instance
+from lbc.scripts.run import make_instance, run_instance
 
 
 def get_unique_key(param, trial=None):

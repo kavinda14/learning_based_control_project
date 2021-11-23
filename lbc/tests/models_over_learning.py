@@ -3,7 +3,7 @@ import numpy as np
 
 from lbc import plotter
 from lbc.learning.oracles import get_oracles
-from lbc.problems.problem import get_problem
+from lbc.problems.utils import get_problem
 
 
 def eval_models(problem, policy_model_fns, policy_oracle_name, value_model_fns, value_oracle_name, num_eval,

@@ -2,7 +2,7 @@ import numpy as np
 import scipy.io
 
 from lbc.param import Param
-from lbc.run import make_instance, run_instance
+from lbc.scripts.run import make_instance, run_instance
 
 
 def relative_pos_to_state(pos_i):
