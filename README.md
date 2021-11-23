@@ -1,17 +1,19 @@
+Learning Based Control
+=====
 
-This repository contains code for the following publication, please cite our work if you use this repo:
+## Overview
+
+This repository is an extension of the code found at `https://github.com/bpriviere/decision_making`.
 
 B. Riviere, W. Hönig, M. Anderson, S-J. Chung. "Neural Tree Expansion for Multi-Robot Planning in Non-Cooperative Environments" in IEEE Robotics and Automation Letters (RA-L) June 2021. 
 
 
 ## Dependencies:
 
-Developed on Ubuntu 20.04. Python dependencies in `~/environment.yml`, can be batch installed with: 
-
-This project can be installed into a virtual environment using the following command:
+This project should be installed into a virtual environment using the following command:
 
 ```
-python3 pip install setup.py
+pip install -e .
 ```
 
 If this fails, remove the offending entry from `requirements.txt` and try again.

@@ -1,7 +1,6 @@
 """
 dummy game for debugging: multiple single integrator regulator problems
 """
-
 import numpy as np
 import matplotlib.pyplot as plt
 

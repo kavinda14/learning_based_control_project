@@ -1,7 +1,6 @@
 """
 modified homicidal chauffeur problem - http://www-m6.ma.tum.de/~turova/html/wroclaw_eng_ver01a.pdf
 """
-
 import numpy as np
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
