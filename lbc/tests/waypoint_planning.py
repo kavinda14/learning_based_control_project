@@ -1,12 +1,9 @@
+import numpy as np
+import scipy.io
 
+from lbc.param import Param
+from lbc.scripts.run import make_instance, run_instance
 
-import numpy as np 
-import scipy.io 
-import sys 
-sys.path.append("../")
-
-from param import Param 
-from run import make_instance, run_instance
 
 def relative_pos_to_state(pos_i):
 	# assume s2 is at (0,0,0), pos_i = s_2-s_1
@@ -38,6 +35,3 @@ if __name__ == '__main__':
 
 	sim_result = run_instance(instance)
 	print('sim_result["states"][:,0:3]',sim_result["states"][:,0:3])
-
-	
-

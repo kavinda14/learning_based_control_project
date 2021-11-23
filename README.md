@@ -5,21 +5,27 @@ B. Riviere, W. Hönig, M. Anderson, S-J. Chung. "Neural Tree Expansion for Multi
 
 
 ## Dependencies:
+
 Developed on Ubuntu 20.04. Python dependencies in `~/environment.yml`, can be batch installed with: 
 
-```
-conda env create -f environment.yml
-```
-If package install fails, try removing specific versions in `.yml` file: e.g. if 
-```
-ResolvePackageNotFound: 
-  - libgfortran-ng==7.5.0=hdf63c60_6
-```  
-change `libgfortran-ng==7.5.0=hdf63c60_6` to `libgfortran-ng=7.5.0`. 
+This project can be installed into a virtual environment using the following command:
 
-Then:
 ```
-conda activate dm_env
+python3 pip install setup.py
+```
+
+If this fails, remove the offending entry from `requirements.txt` and try again.
+
+Due to `pytorch` having further dependencies and run configurations, that package is best installed individually. For instance, if running on Windows, , pip, and cuda 11.3, the command is as follows:
+
+```
+pip3 install torch==1.10.0+cu113 torchvision==0.11.1+cu113 torchaudio===0.10.0+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html
+```
+
+Refer to the `pytorch` documentation for more information regarind install configurations. 
+
+```
+https://pytorch.org/get-started/locally/
 ```
 
 ## Compiling:

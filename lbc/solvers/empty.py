@@ -1,21 +1,14 @@
+import numpy as np
 
-# standard
-import numpy as np 
-
-# custom
-from solvers.solver import Solver 
+from lbc.solvers.solver import Solver
 
 
 class Empty(Solver):
 
-	def __init__(self):
-		pass 
+    def __init__(self):
+        super().__init__()
+        self.solver_name = "empty"
 
-	def policy(self,problem,state):
-		action_dim = problem.action_dim
-		return np.zeros((action_dim,1))
-
-
-
-
-
+    def policy(self, problem, state):
+        action_dim = problem.action_dim
+        return np.zeros((action_dim, 1))
