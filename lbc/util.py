@@ -19,7 +19,6 @@ from lbc.problems.example6 import Example6
 from lbc.problems.example7 import Example7
 from lbc.problems.example8 import Example8
 from lbc.problems.example9 import Example9
-from lbc.solvers.empty import Empty
 from lbc.solvers.mcts import MCTS
 from lbc.solvers.policy_solver import PolicySolver
 from lbc.solvers.puct_v1 import PUCT_V1
@@ -41,7 +40,6 @@ PROBLEM_MAP = {
 }
 
 SOLVER_MAP = {
-    'empty': Empty,
     'mcts': MCTS,
     'puct_v1': PUCT_V1,
     'puct_v2': PUCT_V2,
@@ -70,42 +68,6 @@ def get_solver(solver_name, vis_on=False, **kwargs):
     """
     solver = SOLVER_MAP[solver_name.lower()]
     solver = solver(**kwargs)
-    return solver
-    # if solver_name == "Empty":
-    #     solver = Empty()
-    # elif solver_name == "MCTS":
-    #     solver = MCTS()
-    # elif solver_name == "PUCT_V1":
-    #     solver = PUCT_V1(
-    #         policy_oracle=policy_oracle,
-    #         value_oracle=value_oracle,
-    #         search_depth=search_depth,
-    #         number_simulations=number_simulations,
-    #         C_pw=C_pw,
-    #         alpha_pw=alpha_pw,
-    #         C_exp=C_exp,
-    #         alpha_exp=alpha_exp,
-    #         beta_policy=beta_policy,
-    #         beta_value=beta_value,
-    #         vis_on=vis_on
-    #     )
-    # elif solver_name == "PUCT_V2":
-    #     solver = PUCT_V2(
-    #         policy_oracle=policy_oracle,
-    #         value_oracle=value_oracle,
-    #         search_depth=search_depth,
-    #         number_simulations=number_simulations,
-    #         C_pw=C_pw,
-    #         alpha_pw=alpha_pw,
-    #         C_exp=C_exp,
-    #         alpha_exp=alpha_exp,
-    #         beta_policy=beta_policy,
-    #         beta_value=beta_value,
-    #         vis_on=vis_on
-    #     )
-    # elif solver_name == "NeuralNetwork":
-    #     solver = PolicySolver(policy_oracle=policy_oracle)
-
     return solver
 
 

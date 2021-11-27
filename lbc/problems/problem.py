@@ -1,7 +1,9 @@
 import numpy as np
 
+
 def contains(vector, lims):
     return (vector[:, 0] >= lims[:, 0]).all() and (vector[:, 0] <= lims[:, 1]).all()
+
 
 def sample_vector(lims, damp=0.0):
     # from cube

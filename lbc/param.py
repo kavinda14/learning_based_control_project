@@ -1,19 +1,22 @@
+from pathlib import Path
+
+
 class Param:
 
     def __init__(self):
-        self.parallel_on = True
+        self.parallel_on = False
         self.num_trials = 5
 
-        # names
-        self.problem_name = "example8"  # e.g. example1, example2, example3, ...
-        self.solver_name = "C_PUCT_V1"  # e.g. Empty, DARE, PUCT_V0, C_PUCT_V0, PUCT_V1, ...
+        self.problem_name = "example4"  # e.g. example1, example2, example3, ...
+        self.solver_name = "PUCT_V2"  # e.g. Empty, DARE, PUCT_V0, C_PUCT_V0, PUCT_V1, ...
         self.value_oracle_name = "deterministic"  # ["deterministic","gaussian"]
-        self.policy_oracle_name = "gaussian"  # ["deterministic","gaussian"]
+        self.policy_oracle_name = "deterministic"  # ["deterministic","gaussian"]
 
         # oracles
         oracles_on = True
-        # dirname = "../current/models"
-        dirname = "/home/ben/projects/decision_making/saved/example9"
+        # dirname = f"../current/models"
+        dirname = str(Path('current', 'models'))
+        # dirname = "/home/ben/projects/decision_making/saved/example9"
         # dirname = "/home/ben/projects/decision_making/saved/example6"
 
         n = 2  # num robots

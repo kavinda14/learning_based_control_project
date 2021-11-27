@@ -1,9 +1,5 @@
-import itertools
-import multiprocessing as mp
-import os
 import tempfile
 import time
-from queue import Queue
 
 import numpy as np
 import torch
@@ -12,50 +8,25 @@ from tqdm import tqdm
 
 from lbc import plotter
 from lbc.learning.oracles import get_oracles
-from lbc.util import get_dataset_fn, write_dataset, get_oracle_fn, format_dir, init_tqdm, update_tqdm, get_solver, \
-    get_problem
-
-parallel_on = True
-
-# solver settings
-# number_simulations = 50
-number_simulations = 500
-search_depth = 50
-C_pw = 10.0
-alpha_pw = 0.25
-C_exp = 10.0
-alpha_exp = 0.5
-beta_policy = 0.0
-beta_value = 0.7
-vis_on = True
-
-solver_name = "C_PUCT_V1"
-# solver_name = "PUCT_V1"
-problem_name = "example6"
-value_oracle_name = "deterministic"
-
-# learning
-L = 20
-num_D_v = 2000
-# num_D_v = 200
-num_v_eval = 2000
-
-learning_rate = 0.001
-num_epochs = 1000
-# num_epochs = 100
-batch_size = 128
-train_test_split = 0.8
+from lbc.util import get_dataset_fn, write_dataset, get_oracle_fn, format_dir, get_solver, get_problem
 
 
-# Shah-like training 
+# noinspection PyUnresolvedReferences
 class Dataset(torch.utils.data.Dataset):
 
-    def __init__(self, src_file, encoding_dim, target_dim, device='cpu'):
-        with open(src_file, 'rb') as h:
-            datapoints = np.load(h)
+    def __init__(self, src_file, encoding_dim, device='cpu'):
+        """
+        Shah-like training
+
+        :param src_file:
+        :param encoding_dim:
+        :param device:
+        """
+        datapoints = np.load(src_file)
         self.X_np, self.target_np = datapoints[:, 0:encoding_dim], datapoints[:, encoding_dim:]
         self.X_torch = torch.tensor(self.X_np, dtype=torch.float32, device=device)
         self.target_torch = torch.tensor(self.target_np, dtype=torch.float32, device=device)
+        return
 
     def __len__(self):
         return self.X_torch.shape[0]
@@ -68,102 +39,68 @@ class Dataset(torch.utils.data.Dataset):
     def to(self, device):
         self.X_torch = self.X_torch.to(device)
         self.target_torch = self.target_torch.to(device)
+        return
 
 
-# expert value demonstration functions 
-def worker_edv_wrapper(arg):
-    return worker_edv(*arg)
-
-
-def worker_edv(rank, queue, fn, seed, problem, num_states, total_num_states,
-               policy_oracle, value_oracle):
+# expert value demonstration functions
+def worker_edv(solver, save_path, seed, problem, num_states):
     np.random.seed(seed)
-    pbar = init_tqdm(rank, total_num_states)
+    pbar = tqdm(total=num_states)
     datapoints = []
     while len(datapoints) < num_states:
-        solver = get_solver(
-            solver_name,
-            policy_oracle=policy_oracle,
-            value_oracle=value_oracle,
-            number_simulations=number_simulations,
-            beta_value=beta_value)
         root_state = problem.sample_state()
         root_node = solver.search(problem, root_state)
         if root_node.success:
             datapoint = np.append(root_state.squeeze(), root_node.value)
             datapoints.append(datapoint)
-            update_tqdm(rank, 1, queue, pbar)
+            pbar.update(1)
     datapoints = np.array(datapoints)
-    np.save(fn, datapoints)
-    del solver
+    np.save(save_path, datapoints)
     return datapoints
 
 
-def make_expert_demonstration_v(problem, num_states, value_oracle, policy_oracle):
+def make_expert_demonstration_v(problem, solver_name, num_states, value_oracle, policy_oracle, train_size, learning_idx,
+                                number_simulations, beta_value):
     start_time = time.time()
     print('making value dataset...')
 
-    paths = []
-    if parallel_on:
-        ncpu = mp.cpu_count() - 1
-        num_states_per_pool = int(num_states / ncpu)
-        seeds = []
-        for i in range(ncpu):
-            _, path = tempfile.mkstemp()
-            paths.append(path + '.npy')
-            seeds.append(np.random.randint(10000))
-        with mp.Pool(ncpu) as pool:
-            queue = mp.Manager().Queue()
-            args = list(zip(itertools.count(), itertools.repeat(queue), paths,
-                            seeds, itertools.repeat(problem), itertools.repeat(num_states_per_pool),
-                            itertools.repeat(num_states), itertools.repeat(policy_oracle),
-                            itertools.repeat(value_oracle)))
-            for _ in pool.imap_unordered(worker_edv_wrapper, args):
-                pass
+    _, save_path = tempfile.mkstemp()
+    seed = np.random.randint(10000)
+    # policy_oracle=None, value_oracle=None, search_depth=10, number_simulations=1000, C_pw=2.0, alpha_pw=0.5,
+    # C_exp=1.0, alpha_exp=0.25, beta_policy=0., beta_value=0., vis_on=False
+    solver = get_solver(solver_name, policy_oracle=policy_oracle, value_oracle=value_oracle,
+                        number_simulations=number_simulations, beta_value=beta_value)
+    datapoints = worker_edv(solver, save_path, seed, problem, num_states)
 
-    else:
-        _, path = tempfile.mkstemp()
-        seed = np.random.randint(10000)
-        paths.append(path + '.npy')
-        worker_edv_wrapper((0, Queue(), path, seed, problem, num_states, num_states, policy_oracle, value_oracle))
-
-    datapoints = []
-    plot_count = 0
-    for path in paths:
-        datapoints_i = np.load(path, allow_pickle=True)
-        datapoints.extend(datapoints_i)
-        os.remove(path)
-
-    split = int(len(datapoints) * train_test_split)
+    split = int(len(datapoints) * train_size)
     train_dataset = datapoints_to_dataset(datapoints[0:split], "train_value",
-                                          problem.value_encoding_dim, problem.num_robots)
+                                          problem.value_encoding_dim, problem.num_robots, learning_idx=learning_idx)
     test_dataset = datapoints_to_dataset(datapoints[split:], "test_value",
-                                         problem.value_encoding_dim, problem.num_robots)
+                                         problem.value_encoding_dim, problem.num_robots, learning_idx=learning_idx)
     plotter.plot_value_dataset(problem,
                                [[train_dataset.X_np, train_dataset.target_np],
                                 [test_dataset.X_np, test_dataset.target_np]],
                                ["Train", "Test"])
-    plotter.save_figs("../current/models/dataset_value_l{}.pdf".format(l))
-    print('expert demonstration v completed in {}s.'.format(time.time() - start_time))
+    plotter.save_figs(f"../current/models/dataset_value_l{learning_idx}.pdf")
+    print(f'expert demonstration v completed in {time.time() - start_time}s.')
     return train_dataset, test_dataset
 
 
-def datapoints_to_dataset(datapoints, oracle_name, encoding_dim, target_dim, robot=0):
-    dataset_fn = get_dataset_fn(oracle_name, l, robot=robot)
+def datapoints_to_dataset(datapoints, oracle_name, encoding_dim, target_dim, learning_idx, robot=0):
+    dataset_fn = get_dataset_fn(oracle_name, learning_idx, robot=robot)
     datapoints = np.array(datapoints)
     write_dataset(datapoints, dataset_fn)
     dataset = Dataset(dataset_fn, encoding_dim, target_dim)
     return dataset
 
 
-def train_model(problem, train_dataset, test_dataset, l, oracle_name, robot=0):
+# noinspection PyUnresolvedReferences
+def train_model(problem, train_dataset, test_dataset, learning_idx, oracle_name, value_oracle_name,
+                learning_rate, batch_size, num_epochs, device, robot=0):
     start_time = time.time()
     print('training model...')
 
-    # device = "cpu"
-    device = "cuda"
-    model_fn, _ = get_oracle_fn(l, problem.num_robots)
-
+    model_fn, _ = get_oracle_fn(learning_idx, problem.num_robots)
     _, model = get_oracles(problem, value_oracle_name=value_oracle_name, force=True)
     model.to(device)
 
@@ -184,37 +121,35 @@ def train_model(problem, train_dataset, test_dataset, l, oracle_name, robot=0):
         losses.append((train_epoch_loss, test_epoch_loss))
         if test_epoch_loss < best_test_loss:
             best_test_loss = test_epoch_loss
-            torch.save(model.to('cpu').state_dict(), model_fn)
+            torch.save(model.to(device).state_dict(), model_fn)
             model.to(device)
     plotter.plot_loss(losses)
-    plotter.save_figs("../current/models/losses_{}_l{}_i{}.pdf".format(oracle_name, l, robot))
-    print('training model completed in {}s.'.format(time.time() - start_time))
+    plotter.save_figs(f"../current/models/losses_{oracle_name}_l{learning_idx}_i{robot}.pdf")
+    print(f'training model completed in {time.time() - start_time}s.')
     return
 
 
 def train(model, optimizer, loader):
     epoch_loss = 0
-    loss_by_components = []
     for step, (x, target) in enumerate(loader):
         loss = model.loss_fnc(x, target)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
         epoch_loss += float(loss)
-    return epoch_loss / step
+    return epoch_loss / len(loader)
 
 
 def test(model, loader):
     epoch_loss = 0
-    loss_by_components = []
     for step, (x, target) in enumerate(loader):
         loss = model.loss_fnc(x, target)
         epoch_loss += float(loss)
-    return epoch_loss / step
+    return epoch_loss / len(loader)
 
 
-def eval_value(problem, l):
-    value_oracle_path, policy_oracle_paths = get_oracle_fn(l, problem.num_robots)
+def eval_value(problem, learning_idx, num_v_eval, value_oracle_name):
+    value_oracle_path, policy_oracle_paths = get_oracle_fn(learning_idx, problem.num_robots)
     _, value_oracle = get_oracles(problem,
                                   value_oracle_name=value_oracle_name,
                                   value_oracle_path=value_oracle_path
@@ -231,36 +166,75 @@ def eval_value(problem, l):
     states = np.array(states).squeeze(axis=2)
     values = np.array(values).squeeze(axis=2)
     plotter.plot_value_dataset(problem, [[states, values]], ["Eval"])
-    plotter.save_figs("../current/models/value_eval_l{}.pdf".format(l))
+    plotter.save_figs(f"../current/models/value_eval_l{learning_idx}.pdf")
+    return
 
 
-if __name__ == '__main__':
+def main():
+    # solver settings
+    number_simulations = 50
+    search_depth = 50
+    alpha_pw = 0.25
+    alpha_exp = 0.5
+    beta_policy = 0.0
+    beta_value = 0.7
+    vis_on = True
+    device = 'cuda'
+
+    solver_name = "PUCT_V1"
+    problem_name = "example4"
+    value_oracle_name = "deterministic"
+
+    # learning
+    num_learning_iters = 20
+    num_D_v = 200
+    num_v_eval = 200
+
+    learning_rate = 0.001
+    num_epochs = 100
+    batch_size = 128
+    train_size = 0.8
+
     problem = get_problem(problem_name)
     format_dir(clean_dirnames=["data", "models"])
 
-    if batch_size > num_D_v * (1 - train_test_split):
-        batch_size = int(num_D_v * train_test_split / 5)
-        print('changing batch size to {}'.format(batch_size))
+    if batch_size > num_D_v * (1 - train_size):
+        batch_size = int(num_D_v * train_size / 5)
+        print(f'changing batch size to {batch_size}')
 
     # training
-    for l in range(L):
+    for learning_idx in range(num_learning_iters):
         start_time = time.time()
-        print('learning iteration: {}/{}...'.format(l, L))
+        print(f'learning iteration: {learning_idx}/{num_learning_iters}...')
 
         policy_oracle = [None for _ in range(problem.num_robots)]
 
-        if l == 0:
+        if learning_idx == 0:
             value_oracle_path = None
             value_oracle = None
         else:
-            value_oracle_path, _ = get_oracle_fn(l - 1, problem.num_robots)
+            value_oracle_path, _ = get_oracle_fn(learning_idx - 1, problem.num_robots)
             _, value_oracle = get_oracles(problem,
                                           value_oracle_name=value_oracle_name,
                                           value_oracle_path=value_oracle_path
                                           )
 
-        print('\t value training l/L: {}/{}'.format(l, L))
-        train_dataset_v, test_dataset_v = make_expert_demonstration_v(problem, num_D_v, value_oracle, policy_oracle)
-        train_model(problem, train_dataset_v, test_dataset_v, l, "value")
-        eval_value(problem, l)
-        print('complete learning iteration: {}/{} in {}s'.format(l, L, time.time() - start_time))
+        print(f'\tvalue training: {learning_idx}/{num_learning_iters}')
+        train_dataset_v, test_dataset_v = make_expert_demonstration_v(
+            problem, solver_name=solver_name, num_states=num_D_v,
+            value_oracle=value_oracle, policy_oracle=policy_oracle, train_size=train_size, learning_idx=learning_idx,
+            beta_value=beta_value, number_simulations=number_simulations
+        )
+        train_model(
+            problem,
+            train_dataset_v, test_dataset_v, learning_idx, "value",
+            device=device, batch_size=batch_size, learning_rate=learning_rate,
+            num_epochs=num_epochs, value_oracle_name=value_oracle_name
+        )
+        eval_value(problem, learning_idx, num_v_eval=num_v_eval, value_oracle_name=value_oracle_name)
+        print(f'complete learning iteration: {learning_idx}/{num_learning_iters} in {time.time() - start_time}s')
+    return
+
+
+if __name__ == '__main__':
+    main()
