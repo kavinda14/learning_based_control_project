@@ -5,6 +5,7 @@ import pickle
 from queue import Empty
 
 import numpy as np
+import torch
 from tqdm import tqdm
 
 from lbc.problems.example1 import Example1
@@ -150,3 +151,35 @@ def update_tqdm(rank, total_per_worker, queue, pbar):
         pbar.update(count)
     else:
         queue.put_nowait(total_per_worker)
+
+
+def datapoints_to_dataset(datapoints, oracle_name, encoding_dim, learning_idx, robot=0):
+    dataset_fn = get_dataset_fn(oracle_name, learning_idx, robot=robot)
+    datapoints = np.array(datapoints)
+    write_dataset(datapoints, dataset_fn)
+    dataset = Dataset(dataset_fn, encoding_dim, device='cuda')
+    return dataset
+
+
+# noinspection PyUnresolvedReferences
+class Dataset(torch.utils.data.Dataset):
+
+    def __init__(self, src_file, encoding_dim, device='cpu'):
+        datapoints = np.load(src_file)
+        self.X_np, self.target_np = datapoints[:, 0:encoding_dim], datapoints[:, encoding_dim:]
+        self.X_torch = torch.tensor(self.X_np, dtype=torch.float32, device=device)
+        self.target_torch = torch.tensor(self.target_np, dtype=torch.float32, device=device)
+        return
+
+    def __len__(self):
+        return self.X_torch.shape[0]
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+        return self.X_torch[idx, :], self.target_torch[idx, :]
+
+    def to(self, device):
+        self.X_torch = self.X_torch.to(device)
+        self.target_torch = self.target_torch.to(device)
+        return

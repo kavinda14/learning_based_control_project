@@ -8,38 +8,7 @@ from tqdm import tqdm
 
 from lbc import plotter
 from lbc.learning.oracles import get_oracles
-from lbc.util import get_dataset_fn, write_dataset, get_oracle_fn, format_dir, get_solver, get_problem
-
-
-# noinspection PyUnresolvedReferences
-class Dataset(torch.utils.data.Dataset):
-
-    def __init__(self, src_file, encoding_dim, device='cpu'):
-        """
-        Shah-like training
-
-        :param src_file:
-        :param encoding_dim:
-        :param device:
-        """
-        datapoints = np.load(src_file)
-        self.X_np, self.target_np = datapoints[:, 0:encoding_dim], datapoints[:, encoding_dim:]
-        self.X_torch = torch.tensor(self.X_np, dtype=torch.float32)
-        self.target_torch = torch.tensor(self.target_np, dtype=torch.float32)
-        return
-
-    def __len__(self):
-        return self.X_torch.shape[0]
-
-    def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-        return self.X_torch[idx, :], self.target_torch[idx, :]
-
-    def to(self, device):
-        self.X_torch = self.X_torch.to(device)
-        self.target_torch = self.target_torch.to(device)
-        return
+from lbc.util import get_oracle_fn, format_dir, get_solver, get_problem, datapoints_to_dataset
 
 
 # expert value demonstration functions
@@ -74,9 +43,9 @@ def make_expert_demonstration_v(problem, solver_name, num_states, value_oracle, 
 
     split = int(len(datapoints) * train_size)
     train_dataset = datapoints_to_dataset(datapoints[0:split], "train_value",
-                                          problem.value_encoding_dim, problem.num_robots, learning_idx=learning_idx)
+                                          encoding_dim=problem.value_encoding_dim, learning_idx=learning_idx)
     test_dataset = datapoints_to_dataset(datapoints[split:], "test_value",
-                                         problem.value_encoding_dim, problem.num_robots, learning_idx=learning_idx)
+                                         encoding_dim=problem.value_encoding_dim, learning_idx=learning_idx)
     plotter.plot_value_dataset(problem,
                                [[train_dataset.X_np, train_dataset.target_np],
                                 [test_dataset.X_np, test_dataset.target_np]],
@@ -86,16 +55,18 @@ def make_expert_demonstration_v(problem, solver_name, num_states, value_oracle, 
     return train_dataset, test_dataset
 
 
-def datapoints_to_dataset(datapoints, oracle_name, encoding_dim, target_dim, learning_idx, robot=0):
-    dataset_fn = get_dataset_fn(oracle_name, learning_idx, robot=robot)
-    datapoints = np.array(datapoints)
-    write_dataset(datapoints, dataset_fn)
-    dataset = Dataset(dataset_fn, encoding_dim, target_dim)
-    return dataset
+# def datapoints_to_dataset(datapoints, oracle_name, encoding_dim, target_dim, learning_idx, robot=0):
+#     dataset_fn = get_dataset_fn(oracle_name, learning_idx, robot=robot)
+#     datapoints = np.array(datapoints)
+#     write_dataset(datapoints, dataset_fn)
+#     # todo check order of parameters
+#     # src_file, encoding_dim, device='cpu'
+#     dataset = Dataset(dataset_fn, encoding_dim, target_dim)
+#     return dataset
 
 
 # noinspection PyUnresolvedReferences
-def train_model(problem, train_dataset, test_dataset, learning_idx, oracle_name, value_oracle_name,
+def train_model(problem, train_dataset, test_dataset, learning_idx, oracle_type, value_oracle_name,
                 learning_rate, batch_size, num_epochs, device, robot=0):
     start_time = time.time()
     print('training model...')
@@ -124,7 +95,7 @@ def train_model(problem, train_dataset, test_dataset, learning_idx, oracle_name,
             torch.save(model.to(device).state_dict(), model_fn)
             model.to(device)
     plotter.plot_loss(losses)
-    plotter.save_figs(f"../current/models/losses_{oracle_name}_l{learning_idx}_i{robot}.pdf")
+    plotter.save_figs(f"../current/models/losses_{oracle_type}_l{learning_idx}_i{robot}.pdf")
     print(f'training model completed in {time.time() - start_time}s.')
     return
 
@@ -187,7 +158,7 @@ def main():
 
     # learning
     num_learning_iters = 20
-    num_D_v = 20
+    num_d_v = 20
     num_v_eval = 20
 
     learning_rate = 0.001
@@ -198,8 +169,8 @@ def main():
     problem = get_problem(problem_name)
     format_dir(clean_dirnames=["data", "models"])
 
-    if batch_size > num_D_v * (1 - train_size):
-        batch_size = int(num_D_v * train_size / 5)
+    if batch_size > num_d_v * (1 - train_size):
+        batch_size = int(num_d_v * train_size / 5)
         print(f'changing batch size to {batch_size}')
 
     # training
@@ -221,13 +192,13 @@ def main():
 
         print(f'\tvalue training: {learning_idx}/{num_learning_iters}')
         train_dataset_v, test_dataset_v = make_expert_demonstration_v(
-            problem, solver_name=solver_name, num_states=num_D_v,
+            problem, solver_name=solver_name, num_states=num_d_v,
             value_oracle=value_oracle, policy_oracle=policy_oracle, train_size=train_size, learning_idx=learning_idx,
             beta_value=beta_value, number_simulations=number_simulations
         )
         train_model(
-            problem,
-            train_dataset_v, test_dataset_v, learning_idx, "value",
+            problem, train_dataset_v, test_dataset_v,
+            learning_idx=learning_idx, oracle_type="value",
             device=device, batch_size=batch_size, learning_rate=learning_rate,
             num_epochs=num_epochs, value_oracle_name=value_oracle_name
         )
