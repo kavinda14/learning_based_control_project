@@ -221,7 +221,8 @@ def plot_value_dataset(problem, datasets, dataset_names):
         ax[1, 0].set_ylabel("Target")
         fig.suptitle(title)
 
-        problem.plot_value_dataset(dataset, title)
+        # problem.plot_value_dataset(dataset, title)
+        return
 
 
 def plot_policy_dataset(problem, datasets, dataset_names, robot):

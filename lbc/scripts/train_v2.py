@@ -24,8 +24,8 @@ class Dataset(torch.utils.data.Dataset):
         """
         datapoints = np.load(src_file)
         self.X_np, self.target_np = datapoints[:, 0:encoding_dim], datapoints[:, encoding_dim:]
-        self.X_torch = torch.tensor(self.X_np, dtype=torch.float32, device=device)
-        self.target_torch = torch.tensor(self.target_np, dtype=torch.float32, device=device)
+        self.X_torch = torch.tensor(self.X_np, dtype=torch.float32)
+        self.target_torch = torch.tensor(self.target_np, dtype=torch.float32)
         return
 
     def __len__(self):
@@ -187,8 +187,8 @@ def main():
 
     # learning
     num_learning_iters = 20
-    num_D_v = 200
-    num_v_eval = 200
+    num_D_v = 20
+    num_v_eval = 20
 
     learning_rate = 0.001
     num_epochs = 100
