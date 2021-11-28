@@ -2,11 +2,12 @@ import torch
 from torch.nn import MSELoss
 
 from lbc.learning.feedforward import FeedForward
+from lbc.problems.problem import Problem
 
 
 class DeterministicPolicyNetwork(torch.nn.Module):
 
-    def __init__(self, problem, device="cpu", path=None, output_dim=None):
+    def __init__(self, problem: Problem, device="cpu", path=None, output_dim=None):
         super(DeterministicPolicyNetwork, self).__init__()
 
         self.encoding_dim = problem.policy_encoding_dim

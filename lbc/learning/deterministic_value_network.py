@@ -2,11 +2,12 @@ import torch
 from torch.nn import MSELoss
 
 from lbc.learning.feedforward import FeedForward
+from lbc.problems.problem import Problem
 
 
 class DeterministicValueNetwork(torch.nn.Module):
 
-    def __init__(self, problem, device="cpu", path=None):
+    def __init__(self, problem: Problem, device="cpu", path=None):
         super(DeterministicValueNetwork, self).__init__()
 
         self.encoding_dim = problem.value_encoding_dim

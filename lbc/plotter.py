@@ -10,6 +10,8 @@ from matplotlib.backends.backend_pdf import PdfPages
 from mpl_toolkits.mplot3d.art3d import Line3DCollection
 
 # defaults
+from lbc.problems.problem import Problem
+
 plt.rcParams.update({'font.size': 10})
 plt.rcParams['lines.linewidth'] = 2.5
 matplotlib.use('Agg')
@@ -121,7 +123,7 @@ def plot_loss(losses):
     ax.set_title("Losses")
 
 
-def plot_tree_state(problem, tree_state, zoom_on=True):
+def plot_tree_state(problem: Problem, tree_state, zoom_on=True):
     # tree state : nd array in [num_nodes x state_dim + 1]
     position_idxs = problem.position_idx
 
@@ -198,7 +200,7 @@ def plot_tree_state(problem, tree_state, zoom_on=True):
         print('tree plot dimension not supported')
 
 
-def plot_value_dataset(problem, datasets, dataset_names):
+def plot_value_dataset(problem: Problem, datasets, dataset_names):
     encoding_dim = problem.policy_encoding_dim
     target_dim = 1
     state_lims = problem.state_lims
@@ -225,7 +227,7 @@ def plot_value_dataset(problem, datasets, dataset_names):
         return
 
 
-def plot_policy_dataset(problem, datasets, dataset_names, robot):
+def plot_policy_dataset(problem: Problem, datasets, dataset_names, robot):
     # datapoints: [(encoding,target) ]
     # encoding: problem.policy_encoding(state)
     # target: robot_action

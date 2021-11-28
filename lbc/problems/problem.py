@@ -17,19 +17,22 @@ def sample_vector(lims, damp=0.0):
 class Problem:
 
     def __init__(self):
+        self.name = None
         self.num_robots = None
-        self.gamma = None
+        # self.gamma = None
         self.state_dim = None
-        self.state_lims = None
-        self.init_lims = None
         self.action_dim = None
-        self.action_lims = None
-        self.position_idx = None
-        self.dt = None
-        self.times = None
+
         self.policy_encoding_dim = None
         self.value_encoding_dim = None
-        self.name = None
+
+        self.state_lims = None
+        self.action_lims = None
+        self.init_lims = None
+
+        # self.position_idx = None
+        # self.dt = None
+        # self.times = None
 
     def sample_action(self):
         return sample_vector(self.action_lims)

@@ -11,6 +11,7 @@ def get_reward(state, action: list):
     goal_dist = state[2]
     priority = state[3]
 
+    # todo calculate distance - state[2] is the goal location, not distance to goal
     reward = 1 / goal_dist
     # closest agents detected in all 8 octants
     for i in range(8):
@@ -18,7 +19,6 @@ def get_reward(state, action: list):
         priority_i = state[11 + i]
         reward_i = (priority - priority_i) * (1 - d_xi)
         reward += reward_i
-
     return reward
 
 

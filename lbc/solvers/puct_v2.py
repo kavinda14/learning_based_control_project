@@ -8,6 +8,7 @@ only changes from PUCT_V1 are:
 import numpy as np
 
 from lbc import plotter
+from lbc.problems.problem import Problem
 from lbc.solvers.solver import Solver
 
 
@@ -30,7 +31,7 @@ class PUCT_V2(Solver):
         self.vis_on = vis_on
         self.solver_name = "PUCT_V2"
 
-    def policy(self, problem, root_state):
+    def policy(self, problem: Problem, root_state):
         action = np.zeros((problem.action_dim + 1 * problem.num_robots, 1))
         for robot in range(problem.num_robots):
             # add a dimension for time
@@ -41,7 +42,7 @@ class PUCT_V2(Solver):
             action[tree_action_idxs, :] = root_node.edges[most_visited_child][tree_action_idxs, :]
         return action
 
-    def expand_node(self, parent_node, problem):
+    def expand_node(self, parent_node, problem: Problem):
         valid = False
         while not valid:
             if self.policy_oracle is not None and np.random.uniform() < self.beta_policy:
@@ -100,7 +101,7 @@ class PUCT_V2(Solver):
             value += rewards[d] * gamma ** d
         return value
 
-    def search(self, problem, root_state, turn=0):
+    def search(self, problem: Problem, root_state, turn=0):
 
         # init tree
         root_node = Node(root_state, None, problem.num_robots)

@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 
+from lbc.problems.problem import Problem
 from lbc.solvers.solver import Solver
 
 
@@ -11,7 +12,7 @@ class PolicySolver(Solver):
         self.policy_oracle = policy_oracle
         self.solver_name = "NeuralNetwork"
 
-    def policy(self, problem, root_state):
+    def policy(self, problem: Problem, root_state):
         action = np.zeros((problem.action_dim, 1))
         for robot in range(problem.num_robots):
             robot_action_idxs = problem.action_idxs[robot]

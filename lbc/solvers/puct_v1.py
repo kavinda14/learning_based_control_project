@@ -4,6 +4,7 @@ Polynomial Upper Confidence Trees (PUCT) pseudocode from PolyHOOT
 import numpy as np
 
 from lbc import plotter
+from lbc.problems.problem import Problem
 from lbc.solvers.policy_solver import PolicySolver
 from lbc.solvers.solver import Solver
 
@@ -28,7 +29,7 @@ class PUCT_V1(Solver):
         self.solver_name = "PUCT_V1"
         self.policy_solver = None
 
-    def policy(self, problem, root_state):
+    def policy(self, problem: Problem, root_state):
         action = np.zeros((problem.action_dim, 1))
         for robot in range(problem.num_robots):
             robot_action_idxs = problem.action_idxs[robot]
@@ -38,7 +39,7 @@ class PUCT_V1(Solver):
                 action[robot_action_idxs, 0] = root_node.edges[most_visited_child][robot_action_idxs, 0]
         return action
 
-    def expand_node(self, parent_node, problem):
+    def expand_node(self, parent_node, problem: Problem):
 
         if not all(x is None for x in self.policy_oracle) and np.random.uniform() < self.beta_policy:
             action = self.policy_solver.policy(problem, parent_node.state)
@@ -67,7 +68,7 @@ class PUCT_V1(Solver):
                 best_c = child
         return best_c
 
-    def default_policy(self, node, problem):
+    def default_policy(self, node, problem: Problem):
         if self.value_oracle is not None and np.random.uniform() < self.beta_value:
             value = self.value_oracle.eval(problem, node.state)
         else:
@@ -89,7 +90,7 @@ class PUCT_V1(Solver):
             value += rewards[d] * gamma ** d
         return value
 
-    def search(self, problem, root_state, turn=0):
+    def search(self, problem: Problem, root_state, turn=0):
 
         # init tree
         root_node = Node(root_state, None, problem.num_robots)
