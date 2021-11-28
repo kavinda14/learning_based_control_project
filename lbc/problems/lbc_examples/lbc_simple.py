@@ -57,6 +57,9 @@ class LbcSimple(Problem):
     def reward(self, s, a):
         return 0
 
+    def normalized_reward(self, state, action):
+        return 0
+    
     def step(self, s, a, dt):
         return
 
