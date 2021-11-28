@@ -8,22 +8,20 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-from lbc.problems.example1 import Example1
-from lbc.problems.example10 import Example10
-from lbc.problems.example11 import Example11
-from lbc.problems.example12 import Example12
-from lbc.problems.example2 import Example2
-from lbc.problems.example3 import Example3
-from lbc.problems.example4 import Example4
-from lbc.problems.example5 import Example5
-from lbc.problems.example6 import Example6
-from lbc.problems.example7 import Example7
-from lbc.problems.example8 import Example8
-from lbc.problems.example9 import Example9
-from lbc.solvers.mcts import MCTS
+from lbc.problems.nte_examples.example1 import Example1
+from lbc.problems.nte_examples.example10 import Example10
+from lbc.problems.nte_examples.example11 import Example11
+from lbc.problems.nte_examples.example12 import Example12
+from lbc.problems.nte_examples.example2 import Example2
+from lbc.problems.nte_examples.example3 import Example3
+from lbc.problems.nte_examples.example4 import Example4
+from lbc.problems.nte_examples.example5 import Example5
+from lbc.problems.nte_examples.example6 import Example6
+from lbc.problems.nte_examples.example7 import Example7
+from lbc.problems.nte_examples.example8 import Example8
+from lbc.problems.nte_examples.example9 import Example9
 from lbc.solvers.policy_solver import PolicySolver
 from lbc.solvers.puct_v1 import PUCT_V1
-from lbc.solvers.puct_v2 import PUCT_V2
 
 PROBLEM_MAP = {
     'example1': Example1,  # 2d single integrator regulator
@@ -41,9 +39,7 @@ PROBLEM_MAP = {
 }
 
 SOLVER_MAP = {
-    'mcts': MCTS,
     'puct_v1': PUCT_V1,
-    'puct_v2': PUCT_V2,
     'NeuralNetwork': PolicySolver
 }
 
