@@ -8,6 +8,7 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
+from lbc.problems.lbc_examples.lbc_simple import LbcSimple
 from lbc.problems.nte_examples.example1 import Example1
 from lbc.problems.nte_examples.example10 import Example10
 from lbc.problems.nte_examples.example11 import Example11
@@ -36,6 +37,7 @@ PROBLEM_MAP = {
     'example10': Example10,  # dummy game problem
     'example11': Example11,  # multiscale bugtrap: 2d single integrator with obstacles
     'example12': Example12,  # modified homicidal chauffer
+    'lbc_simple': LbcSimple,  # modified homicidal chauffer
 }
 
 SOLVER_MAP = {

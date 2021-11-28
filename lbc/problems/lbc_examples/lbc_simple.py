@@ -4,9 +4,11 @@
 import numpy as np
 
 from lbc.problems.problem import Problem, contains
+from lbc.reward_functions import prio_reward
 
 
 def sample_vector(lims, damp=0.0):
+    # todo
     # from cube
     dim = lims.shape[0]
     x = np.zeros((dim, 1))
@@ -18,25 +20,63 @@ def sample_vector(lims, damp=0.0):
 class LbcSimple(Problem):
 
     def __init__(self):
+        """
+        State space of individual agent:
+            s[0], s[1]:                         location of agent
+            s[2]:                               priority of agent
+            s[3], s[4]:                         location of goal
+            s[5:5+num_regions]:                 location to closest other agent in a direction
+            s[5+num_regions:5+2*num_regions]:   priority of closest other agent in a direction
+        Action space of individual agent:
+            Single dimension where the value is the agent being able to move in one of a set
+            number of directions (default is 8)
+        """
         super(LbcSimple, self).__init__()
-        self.name = "lbcsimple"
-        self.dt = 0.1
+        self.name = "lbc_simple"
+        self.dt = 1
         self.gamma = 1.0
 
+        self.board_size = 10
         self.num_robots = 2
-        self.state_dim = 12
-        self.action_dim = 6
+        self.prio_bounds = np.asarray([0, 1])
+
+        self.state_dim_per_robot = 21
+        self.action_dim_per_robot = 1
+        self.num_regions = 8
+
+        self.state_dim = self.num_robots * self.state_dim_per_robot
+        self.action_dim = self.num_robots * self.state_dim_per_robot
+
         self.policy_encoding_dim = self.state_dim
         self.value_encoding_dim = self.state_dim
 
-        state_dim_per_robot = 6
-        action_dim_per_robot = 3
+        self.state_idxs = [
+            each_agent * self.state_dim_per_robot + np.arange(self.state_dim_per_robot)
+            for each_agent in range(self.num_robots)
+        ]
+        self.action_idxs = [
+            each_agent * self.action_dim_per_robot + np.arange(self.action_dim_per_robot)
+            for each_agent in range(self.num_robots)
+        ]
 
-        self.state_idxs = [np.arange(state_dim_per_robot), state_dim_per_robot + np.arange(state_dim_per_robot)]
-        self.action_idxs = [np.arange(action_dim_per_robot), action_dim_per_robot + np.arange(action_dim_per_robot)]
+        self.state_lims = [
+            [0, self.board_size],
+            [0, self.board_size],
+            [np.min(self.prio_bounds), np.max(self.prio_bounds)],
+            [0, self.board_size],
+            [0, self.board_size],
+        ]
+        for _ in range(self.num_regions):
+            self.state_lims.append([0, self.board_size])
+        for _ in range(self.num_regions):
+            self.state_lims.append([np.min(self.prio_bounds), np.max(self.prio_bounds)])
 
-        self.state_lims = None
-        self.action_lims = None
+        self.state_lims = np.asarray(self.state_lims).flatten()
+        self.state_lims = self.state_lims.reshape(-1, 2)
+
+        self.action_lims = np.asarray([
+            [0, self.num_regions]
+        ])
         return
 
     def sample_action(self):
@@ -55,12 +95,11 @@ class LbcSimple(Problem):
         return sample_vector(self.state_lims)
 
     def reward(self, state, action):
-        # todo
-        return 0
+        rew = prio_reward(state, action, num_regions=self.num_regions)
+        return rew
 
     def normalized_reward(self, state, action):
-        # todo
-        return 0
+        return self.reward(state, action)
 
     def step(self, s, a, dt):
         # todo

@@ -17,7 +17,7 @@ def distance(start_coord, end_coord, degree=2):
     return dist
 
 
-def get_reward(state, action: list, num_regions=8):
+def prio_reward(state, action: list, num_regions=8):
     """
     Gets the reward for a secific state-action pair.
     State: [pos x, pos y, distance to goal, priority, 8 * normalized distance to closest agent, 8 * priorities]
@@ -30,7 +30,7 @@ def get_reward(state, action: list, num_regions=8):
     agent_loc = state[0:2]
     goal_loc = state[3:5]
     agent_priority = state[5]
-    
+
     dist_goal = distance(start_coord=agent_loc, end_coord=goal_loc, degree=2)
     reward = 1 / dist_goal
 
@@ -45,7 +45,7 @@ def get_reward(state, action: list, num_regions=8):
     return reward
 
 
-def get_reward_old(priorities, goal, sensing_range, curr_state, all_agent_states, robot):
+def prio_reward_old(priorities, goal, sensing_range, curr_state, all_agent_states, robot):
     """
     Calculate reward for agent at current state.
     priorities (list): goal priorities of all agents

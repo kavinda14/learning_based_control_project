@@ -146,7 +146,7 @@ def main():
     device = 'cuda'
 
     solver_name = "PUCT_V1"
-    problem_name = "example4"
+    problem_name = "lbc_simple"
     value_oracle_name = "deterministic"
 
     # learning
