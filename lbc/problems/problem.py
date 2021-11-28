@@ -1,3 +1,6 @@
+import abc
+from abc import ABC
+
 import numpy as np
 
 
@@ -15,7 +18,7 @@ def sample_vector(lims, damp=0.0):
     return x
 
 
-class Problem:
+class Problem(ABC):
 
     def __init__(self):
         self.name = None
@@ -32,12 +35,18 @@ class Problem:
         self.action_lims = None
         self.init_lims = None
 
+        # position, state, and action idxs are meant as a way to extract information about each individual agent
+        # from the full state/action/position vectors
+        #   s[state_idxs[0]] is the state vector for the first agent
+        #   s[state_idxs[1]] is the state vector for the second agent
+        #   ...
+        #   ...
         self.position_idx = None
         self.state_idxs = None
         self.action_idxs = None
 
         self.dt = None
-        self.times = None
+        return
 
     def sample_action(self):
         return sample_vector(self.action_lims)
@@ -53,23 +62,38 @@ class Problem:
             valid = not self.is_terminal(state)
         return state
 
+    @abc.abstractmethod
     def reward(self, state, action):
-        exit("reward needs to be overwritten")
+        pass
 
+    @abc.abstractmethod
     def normalized_reward(self, state, action):
-        exit("normalized_reward needs to be overwritten")
+        pass
 
+    @abc.abstractmethod
     def step(self, state, action, dt):
-        exit("step needs to be overwritten")
+        pass
 
+    @abc.abstractmethod
     def render(self, states):
-        exit("render needs to be overwritten")
+        pass
 
+    @abc.abstractmethod
     def is_terminal(self, state):
-        exit("is_terminal needs to be overwritten")
+        pass
 
+    @abc.abstractmethod
     def policy_encoding(self, state, robot):
-        exit("policy_encoding needs to be overwritten")
+        pass
 
+    @abc.abstractmethod
     def value_encoding(self, state):
-        exit("value_encoding needs to be overwritten")
+        pass
+
+    @abc.abstractmethod
+    def plot_policy_dataset(self, dataset, title, robot):
+        pass
+
+    @abc.abstractmethod
+    def plot_value_dataset(self, dataset, title):
+        pass

@@ -54,16 +54,20 @@ class LbcSimple(Problem):
         #     valid = not self.is_terminal(state)
         return sample_vector(self.state_lims)
 
-    def reward(self, s, a):
+    def reward(self, state, action):
+        # todo
         return 0
 
     def normalized_reward(self, state, action):
+        # todo
         return 0
-    
+
     def step(self, s, a, dt):
+        # todo
         return
 
     def render(self, states=None, fig=None, ax=None):
+        # todo
         return fig, ax
 
     def is_terminal(self, state):

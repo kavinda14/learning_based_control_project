@@ -32,7 +32,7 @@ class Example4(Problem):
         self.state_idxs = [np.arange(state_dim_per_robot), state_dim_per_robot + np.arange(state_dim_per_robot)]
         self.action_idxs = [np.arange(action_dim_per_robot), action_dim_per_robot + np.arange(action_dim_per_robot)]
 
-        self.times = np.arange(self.t0, self.tf, self.dt)
+        # self.times = np.arange(self.t0, self.tf, self.dt)
         self.policy_encoding_dim = self.state_dim
         self.value_encoding_dim = self.state_dim
 
@@ -95,6 +95,7 @@ class Example4(Problem):
 
         self.Q = np.eye(6)
         self.Ru = self.state_control_weight * np.eye(3)
+        return
 
     def reward(self, s, a):
         s_1 = s[self.state_idxs[0]]
@@ -175,3 +176,11 @@ class Example4(Problem):
 
     def value_encoding(self, state):
         return state
+
+    def plot_value_dataset(self, dataset, title):
+        # todo
+        pass
+
+    def plot_policy_dataset(self, dataset, title, robot):
+        # todo
+        pass
