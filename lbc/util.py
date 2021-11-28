@@ -42,7 +42,8 @@ PROBLEM_MAP = {
 
 SOLVER_MAP = {
     'puct_v1': PUCT_V1,
-    'NeuralNetwork': PolicySolver
+    # 'NeuralNetwork': PolicySolver
+    'neuralnetwork': PolicySolver
 }
 
 
@@ -66,6 +67,7 @@ def get_solver(solver_name, vis_on=False, **kwargs):
     :return:
     """
     solver = SOLVER_MAP[solver_name.lower()]
+    # solver = SOLVER_MAP[solver_name]
     solver = solver(**kwargs)
     return solver
 
