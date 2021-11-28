@@ -170,6 +170,7 @@ class Node:
         self.total_value = np.zeros((num_robots, 1))
         self.children = []
         self.edges = dict()
+        self.success = False
 
     def add_child(self, child_node, action):
         self.children.append(child_node)

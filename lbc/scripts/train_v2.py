@@ -8,11 +8,12 @@ from tqdm import tqdm
 
 from lbc import plotter
 from lbc.learning.oracles import get_oracles
+from lbc.problems.problem import Problem
 from lbc.util import get_oracle_fn, format_dir, get_solver, get_problem, datapoints_to_dataset
 
 
 # expert value demonstration functions
-def worker_edv(solver, save_path, seed, problem, num_states):
+def worker_edv(solver, save_path, seed, problem: Problem, num_states):
     np.random.seed(seed)
     pbar = tqdm(total=num_states)
     datapoints = []
@@ -28,7 +29,8 @@ def worker_edv(solver, save_path, seed, problem, num_states):
     return datapoints
 
 
-def make_expert_demonstration_v(problem, solver_name, num_states, value_oracle, policy_oracle, train_size, learning_idx,
+def make_expert_demonstration_v(problem: Problem, solver_name, num_states, value_oracle, policy_oracle, train_size,
+                                learning_idx,
                                 number_simulations, beta_value):
     start_time = time.time()
     print('making value dataset...')
@@ -55,18 +57,7 @@ def make_expert_demonstration_v(problem, solver_name, num_states, value_oracle, 
     return train_dataset, test_dataset
 
 
-# def datapoints_to_dataset(datapoints, oracle_name, encoding_dim, target_dim, learning_idx, robot=0):
-#     dataset_fn = get_dataset_fn(oracle_name, learning_idx, robot=robot)
-#     datapoints = np.array(datapoints)
-#     write_dataset(datapoints, dataset_fn)
-#     # todo check order of parameters
-#     # src_file, encoding_dim, device='cpu'
-#     dataset = Dataset(dataset_fn, encoding_dim, target_dim)
-#     return dataset
-
-
-# noinspection PyUnresolvedReferences
-def train_model(problem, train_dataset, test_dataset, learning_idx, oracle_type, value_oracle_name,
+def train_model(problem: Problem, train_dataset, test_dataset, learning_idx, oracle_type, value_oracle_name,
                 learning_rate, batch_size, num_epochs, device, robot=0):
     start_time = time.time()
     print('training model...')
@@ -80,7 +71,9 @@ def train_model(problem, train_dataset, test_dataset, learning_idx, oracle_type,
 
     train_dataset.to(device)
     test_dataset.to(device)
+    # noinspection PyUnresolvedReferences
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size)
+    # noinspection PyUnresolvedReferences
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size)
 
     losses = []
@@ -119,7 +112,7 @@ def test(model, loader):
     return epoch_loss / len(loader)
 
 
-def eval_value(problem, learning_idx, num_v_eval, value_oracle_name):
+def eval_value(problem: Problem, learning_idx, num_v_eval, value_oracle_name):
     value_oracle_path, policy_oracle_paths = get_oracle_fn(learning_idx, problem.num_robots)
     _, value_oracle = get_oracles(problem,
                                   value_oracle_name=value_oracle_name,

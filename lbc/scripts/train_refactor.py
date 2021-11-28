@@ -9,11 +9,12 @@ from tqdm import tqdm
 
 from lbc import plotter
 from lbc.learning.oracles import get_oracles
+from lbc.problems.problem import Problem
 from lbc.scripts.run import run_instance
 from lbc.util import get_temp_fn, get_oracle_fn, format_dir, get_problem, get_solver, datapoints_to_dataset
 
 
-def worker_edp(seed, fn, problem, robot, num_per_pool, solver, mode, num_subsamples):
+def worker_edp(seed, fn, problem: Problem, robot, num_per_pool, solver, mode, num_subsamples):
     np.random.seed(seed)
     datapoints = []
 
@@ -52,7 +53,7 @@ def worker_edp(seed, fn, problem, robot, num_per_pool, solver, mode, num_subsamp
     return datapoints
 
 
-def make_expert_demonstration_pi(problem, robot, solver, train_size, learning_idx,
+def make_expert_demonstration_pi(problem: Problem, robot, solver, train_size, learning_idx,
                                  num_D_pi, num_subsamples, mode, dirname):
     start_time = time.time()
     print('making expert demonstration pi...')
@@ -84,7 +85,7 @@ def make_expert_demonstration_pi(problem, robot, solver, train_size, learning_id
     return train_dataset, test_dataset
 
 
-def worker_edv(fn, seed, problem, num_states_per_pool, policy_oracle):
+def worker_edv(fn, seed, problem: Problem, num_states_per_pool, policy_oracle):
     solver = get_solver(
         "NeuralNetwork",
         policy_oracle=policy_oracle)
@@ -110,7 +111,7 @@ def worker_edv(fn, seed, problem, num_states_per_pool, policy_oracle):
     return datapoints
 
 
-def make_expert_demonstration_v(problem, learning_idx, train_size, policy_oracle_name, num_D_v, dirname):
+def make_expert_demonstration_v(problem: Problem, learning_idx, train_size, policy_oracle_name, num_D_v, dirname):
     start_time = time.time()
     print('making value dataset...')
 
@@ -144,7 +145,7 @@ def make_expert_demonstration_v(problem, learning_idx, train_size, policy_oracle
     return train_dataset, test_dataset
 
 
-def calculate_value(problem, sim_result):
+def calculate_value(problem: Problem, sim_result):
     value = np.zeros((problem.num_robots, 1))
     states = sim_result["states"]
     actions = sim_result["actions"]
@@ -154,9 +155,8 @@ def calculate_value(problem, sim_result):
     return value
 
 
-# noinspection PyUnresolvedReferences
-def train_model(problem, train_dataset, test_dataset, learning_idx, policy_oracle_name, value_oracle_name, oracle_type,
-                learning_rate, batch_size, num_epochs, robot=0, device='cuda'):
+def train_model(problem: Problem, train_dataset, test_dataset, learning_idx, policy_oracle_name, value_oracle_name,
+                oracle_type, learning_rate, batch_size, num_epochs, dirname, robot=0, device='cuda'):
     start_time = time.time()
     print('training model...')
 
@@ -186,7 +186,9 @@ def train_model(problem, train_dataset, test_dataset, learning_idx, policy_oracl
 
     train_dataset.to(device)
     test_dataset.to(device)
+    # noinspection PyUnresolvedReferences
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size)
+    # noinspection PyUnresolvedReferences
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size)
 
     losses = []
@@ -225,7 +227,7 @@ def test(model, loader):
     return epoch_loss / len(loader)
 
 
-def eval_value(problem, learning_idx, value_oracle_name, dirname, num_v_eval):
+def eval_value(problem: Problem, learning_idx, value_oracle_name, dirname, num_v_eval):
     value_oracle_path, policy_oracle_paths = get_oracle_fn(learning_idx, problem.num_robots)
 
     _, value_oracle = get_oracles(problem,
@@ -252,7 +254,7 @@ def eval_value(problem, learning_idx, value_oracle_name, dirname, num_v_eval):
     return
 
 
-def eval_policy(problem, learning_idx, policy_oracle_name, num_pi_eval, dirname, robot):
+def eval_policy(problem: Problem, learning_idx, policy_oracle_name, num_pi_eval, dirname, robot):
     value_oracle_path, policy_oracle_paths = get_oracle_fn(learning_idx, problem.num_robots)
     for robot_i, path in enumerate(policy_oracle_paths):
         if robot_i != robot:
@@ -288,7 +290,7 @@ def eval_policy(problem, learning_idx, policy_oracle_name, num_pi_eval, dirname,
     plotter.save_figs("{}/policy_eval_l{}_i{}.pdf".format(dirname, learning_idx, robot))
 
 
-def self_play(problem, policy_oracle, value_oracle, learning_idx, num_self_play_plots, dirname):
+def self_play(problem: Problem, policy_oracle, value_oracle, learning_idx, num_self_play_plots, dirname):
     solver = get_solver(
         "NeuralNetwork",
         policy_oracle=policy_oracle)
@@ -349,7 +351,7 @@ def main():
     batch_size = 1028
     train_size = 0.8
 
-    problem = get_problem(problem_name)
+    problem: Problem = get_problem(problem_name)
     format_dir(clean_dirnames=["data", "models"])
 
     num_d_pi_samples = num_d_pi
@@ -395,7 +397,7 @@ def main():
                 dirname=dirname, mode=mode, num_D_pi=num_d_pi, num_subsamples=num_subsamples)
             train_model(problem, train_dataset_pi, test_dataset_pi, learning_idx=learning_idx, oracle_type="policy",
                         robot=robot, batch_size=batch_size, num_epochs=num_epochs, learning_rate=learning_rate,
-                        policy_oracle_name=policy_oracle_name, value_oracle_name=value_oracle_name)
+                        policy_oracle_name=policy_oracle_name, value_oracle_name=value_oracle_name, dirname=dirname)
             eval_policy(problem, learning_idx=learning_idx, robot=robot, dirname=dirname,
                         policy_oracle_name=policy_oracle_name, num_pi_eval=num_pi_eval)
 
@@ -405,7 +407,7 @@ def main():
             num_D_v=num_d_v, dirname=dirname)
         train_model(problem, train_dataset_v, test_dataset_v, learning_idx=learning_idx,
                     policy_oracle_name=policy_oracle_name, value_oracle_name=value_oracle_name, oracle_type="value",
-                    learning_rate=learning_rate, batch_size=batch_size, num_epochs=num_epochs)
+                    learning_rate=learning_rate, batch_size=batch_size, num_epochs=num_epochs, dirname=dirname)
         eval_value(problem, learning_idx=learning_idx, num_v_eval=num_v_eval,
                    value_oracle_name=value_oracle_name, dirname=dirname)
         print(f'complete learning iteration: {learning_idx}/{learning_iters} in {time.time() - start_time}s')
