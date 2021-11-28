@@ -1,6 +1,7 @@
 import numpy as np
 
 
+# noinspection PyUnresolvedReferences
 def contains(vector, lims):
     return (vector[:, 0] >= lims[:, 0]).all() and (vector[:, 0] <= lims[:, 1]).all()
 
@@ -19,7 +20,8 @@ class Problem:
     def __init__(self):
         self.name = None
         self.num_robots = None
-        # self.gamma = None
+        self.gamma = None
+
         self.state_dim = None
         self.action_dim = None
 
@@ -30,9 +32,9 @@ class Problem:
         self.action_lims = None
         self.init_lims = None
 
-        # self.position_idx = None
-        # self.dt = None
-        # self.times = None
+        self.position_idx = None
+        self.dt = None
+        self.times = None
 
     def sample_action(self):
         return sample_vector(self.action_lims)
