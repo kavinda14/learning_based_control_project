@@ -81,3 +81,11 @@ class LbcSimple(Problem):
 
     def value_encoding(self, state):
         return state
+
+    def plot_policy_dataset(self, dataset, title, robot):
+        # todo
+        pass
+
+    def plot_value_dataset(self, dataset, title):
+        # todo
+        pass
