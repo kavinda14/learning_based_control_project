@@ -12,8 +12,7 @@ if os.path.exists('README.md'):
     with open('README.md', 'r') as desc_file:
         long_description = desc_file.read()
 else:
-    # todo
-    long_description = ''
+    long_description = 'Missing README'
 
 if os.path.exists('requirements.txt'):
     with open('requirements.txt', 'r') as req_file:
@@ -25,8 +24,7 @@ setuptools.setup(
     name=project_properties.name,
     version=project_properties.version,
 
-    # todo
-    description='',
+    description='Explores allowing for explicit prioritization for different agents in multi-agent path deconfliction.',
     long_description=long_description,
     long_description_content_type='text/markdown',
 

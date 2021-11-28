@@ -3,10 +3,11 @@ import numpy as np
 
 from lbc import plotter
 from lbc.learning.oracles import get_oracles
-from lbc.problems.utils import get_problem
+from lbc.problems.problem import Problem
+from lbc.util import get_problem
 
 
-def eval_models(problem, policy_model_fns, policy_oracle_name, value_model_fns, value_oracle_name, num_eval,
+def eval_models(problem: Problem, policy_model_fns, policy_oracle_name, value_model_fns, value_oracle_name, num_eval,
                 num_robots):
     states = []
     for _ in range(num_eval):
@@ -56,8 +57,7 @@ def eval_models(problem, policy_model_fns, policy_oracle_name, value_model_fns, 
     plotter.open_figs("../current/plots/model_over_learning_iterations.pdf")
 
 
-if __name__ == '__main__':
-
+def main():
     problem_name = "example6"
     value_oracle_name = "deterministic"
     policy_oracle_name = "gaussian"
@@ -78,3 +78,8 @@ if __name__ == '__main__':
              range(num_iterations)])
 
     eval_models(problem, policy_model_fns, policy_oracle_name, value_model_fns, value_oracle_name, num_eval, num_robots)
+    return
+
+
+if __name__ == '__main__':
+    main()

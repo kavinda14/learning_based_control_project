@@ -129,7 +129,6 @@ def _worker_run_instance(arg):
 
 
 if __name__ == '__main__':
-
     param = Param()
 
     print('running sim...')

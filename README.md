@@ -7,6 +7,7 @@ This repository is an extension of the code found at `https://github.com/bprivie
 
 B. Riviere, W. Hönig, M. Anderson, S-J. Chung. "Neural Tree Expansion for Multi-Robot Planning in Non-Cooperative Environments" in IEEE Robotics and Automation Letters (RA-L) June 2021. 
 
+This project is aimed at allowing for explicit prioritization for different agents in multi-agent path deconfliction.
 
 ## Dependencies:
 
