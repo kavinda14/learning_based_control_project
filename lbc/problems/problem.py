@@ -33,6 +33,9 @@ class Problem:
         self.init_lims = None
 
         self.position_idx = None
+        self.state_idxs = None
+        self.action_idxs = None
+
         self.dt = None
         self.times = None
 

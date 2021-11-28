@@ -6,17 +6,22 @@ import numpy as np
 from lbc.problems.problem import Problem, contains
 
 
+def sample_vector(lims, damp=0.0):
+    # from cube
+    dim = lims.shape[0]
+    x = np.zeros((dim, 1))
+    for i in range(dim):
+        x[i] = lims[i, 0] + np.random.uniform(damp, 1 - damp) * (lims[i, 1] - lims[i, 0])
+    return x
+
+
 class LbcSimple(Problem):
 
     def __init__(self):
         super(LbcSimple, self).__init__()
         self.name = "lbcsimple"
-
-        state_dim_per_robot = 6
-        action_dim_per_robot = 3
-
-        self.state_idxs = [np.arange(state_dim_per_robot), state_dim_per_robot + np.arange(state_dim_per_robot)]
-        self.action_idxs = [np.arange(action_dim_per_robot), action_dim_per_robot + np.arange(action_dim_per_robot)]
+        self.dt = 0.1
+        self.gamma = 1.0
 
         self.num_robots = 2
         self.state_dim = 12
@@ -24,31 +29,30 @@ class LbcSimple(Problem):
         self.policy_encoding_dim = self.state_dim
         self.value_encoding_dim = self.state_dim
 
-        self.desired_distance = 0.5
+        state_dim_per_robot = 6
+        action_dim_per_robot = 3
 
-        self.r_max = 1000
-        self.r_min = -1 * self.r_max
-
-        self.t0 = 0
-        self.tf = 10
-        self.dt = 0.1
-        self.gamma = 1.0
-        self.mass = 1
-
-        self.position_idx = np.arange(3)
-        self.state_control_weight = 1e-5
-
-        self.times = np.arange(self.t0, self.tf, self.dt)
+        self.state_idxs = [np.arange(state_dim_per_robot), state_dim_per_robot + np.arange(state_dim_per_robot)]
+        self.action_idxs = [np.arange(action_dim_per_robot), action_dim_per_robot + np.arange(action_dim_per_robot)]
 
         self.state_lims = None
         self.action_lims = None
-        self.init_lims = None
-
-        self.Fc = None
-        self.Bc = None
-        self.Q = None
-        self.Ru = None
         return
+
+    def sample_action(self):
+        return sample_vector(self.action_lims)
+
+    def sample_state(self):
+        return sample_vector(self.state_lims)
+
+    def initialize(self):
+        # todo
+        # valid = False
+        # state = None
+        # while not valid:
+        #     state = sample_vector(self.init_lims)
+        #     valid = not self.is_terminal(state)
+        return sample_vector(self.state_lims)
 
     def reward(self, s, a):
         return 0
