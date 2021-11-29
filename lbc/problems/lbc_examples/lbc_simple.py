@@ -20,7 +20,8 @@ def sample_vector(lims, damp=0.0):
 
 class LbcSimple(Problem):
 
-    def __init__(self, sensing_range: float = 4.0):
+    def __init__(self, num_agents: int = 2, agent_speeds: tuple = (1, 1), num_regions: int = 8, board_size: int = 10,
+                 sensing_range: float = 4.0):
         """
         State space of individual agent:
             s[0], s[1]:                         location of agent
@@ -33,24 +34,31 @@ class LbcSimple(Problem):
             number of directions (default is 8)
         """
         super(LbcSimple, self).__init__()
+
+        if isinstance(agent_speeds, int):
+            agent_speeds = (agent_speeds,)
+        if len(agent_speeds) != num_agents:
+            each_speed = agent_speeds[0]
+            self.robot_speeds = [each_speed] * num_agents
+
         self.name = "lbc_simple"
-        self.dt = 1
-        self.gamma = 1.0
-
-        self.board_size = 10
-        self.num_robots = 2
-        self.prio_bounds = np.asarray([0, 1])
-
-        self.state_dim_per_robot = 21
-        self.action_dim_per_robot = 1
-        self.num_regions = 8
+        self.board_size = board_size
+        self.num_robots = num_agents
+        self.num_regions = num_regions
         self.sensing_range = sensing_range
-        self.speed = 1.0
+        self.robot_speeds = agent_speeds
+
         # todo  need to add in linking an agent to a goal position
         #       terminal state is when all agents have reached their goal
         # todo  need to add concept of an obstacle
         #       regions in the space that are not valid locations (need to alter self.isvalid
         self.obstacles = []
+
+        self.dt = 1
+        self.gamma = 1.0
+        self.prio_bounds = np.asarray([0, 1])
+        self.state_dim_per_robot = 21
+        self.action_dim_per_robot = 1
 
         self.state_dim = self.num_robots * self.state_dim_per_robot
         self.action_dim = self.num_robots * self.action_dim_per_robot
@@ -148,23 +156,23 @@ class LbcSimple(Problem):
 
     def step(self, s, a, dt):
         # update robot positions based on action
-        for robot in range(self.num_robots):
-            action = a[robot]
+        for robot_idx in range(self.num_robots):
+            action = a[robot_idx]
             action = action - 1
             if action < 0:
                 continue
             angle = action * (2 * pi / self.num_regions)
-            dx = self.speed * cos(angle[0])
-            dy = self.speed * sin(angle[0])
-            s[self.state_idxs[robot][0]] += dx
-            s[self.state_idxs[robot][1]] += dy
+            dx = self.robot_speeds[robot_idx] * cos(angle[0])
+            dy = self.robot_speeds[robot_idx] * sin(angle[0])
+            s[self.state_idxs[robot_idx][0]] += dx
+            s[self.state_idxs[robot_idx][1]] += dy
 
         # update closest robots in each region
-        for robot in range(self.num_robots):
+        for robot_idx in range(self.num_robots):
             closest_dist = np.full(self.num_regions, self.sensing_range)  # track closest robot in each region
             # loop over all other robots
-            for other_robot in [x for x in range(self.num_robots) if x != robot]:
-                robot_pos = s[self.state_idxs[robot]][0:2]
+            for other_robot in [x for x in range(self.num_robots) if x != robot_idx]:
+                robot_pos = s[self.state_idxs[robot_idx]][0:2]
                 other_robot_pos = s[self.state_idxs[other_robot]][0:2]
                 dist_xy = other_robot_pos - robot_pos
                 angle = atan2(dist_xy[1], dist_xy[0])
@@ -176,9 +184,9 @@ class LbcSimple(Problem):
                 if dist_eucl < closest_dist[action_region]:
                     closest_dist[action_region] = dist_eucl
                     # update closest robot distance in state
-                    s[self.state_idxs[robot][4 + action_region]] = dist_eucl
+                    s[self.state_idxs[robot_idx][4 + action_region]] = dist_eucl
                     # update priority of closest robot in state
-                    s[self.state_idxs[robot][12 + action_region]] = s[self.state_idxs[other_robot][2]]
+                    s[self.state_idxs[robot_idx][12 + action_region]] = s[self.state_idxs[other_robot][2]]
 
         return s
 
