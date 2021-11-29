@@ -90,7 +90,7 @@ class LbcSimple(Problem):
         return
 
     def sample_action(self):
-        return sample_vector(self.action_lims)
+        return np.rint(sample_vector(self.action_lims))
 
     def sample_state(self):
         return sample_vector(self.state_lims)
