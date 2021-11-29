@@ -4,6 +4,7 @@
 from collections import Counter
 
 import numpy as np
+from sympy import sin, cos, atan2, pi
 
 from lbc.problems.problem import Problem
 from lbc.reward_functions import prio_reward
@@ -25,7 +26,7 @@ class LbcSimple(Problem):
             s[0], s[1]:                         location of agent
             s[2]:                               priority of agent
             s[3], s[4]:                         location of goal
-            s[5:5+num_regions]:                 location to closest other agent in a direction
+            s[5:5+num_regions]:                 distance to closest other agent in a direction
             s[5+num_regions:5+2*num_regions]:   priority of closest other agent in a direction
         Action space of individual agent:
             Single dimension where the value is the agent being able to move in one of a set
@@ -43,7 +44,8 @@ class LbcSimple(Problem):
         self.state_dim_per_robot = 21
         self.action_dim_per_robot = 1
         self.num_regions = 8
-        self.sensing_range = 4
+        self.sensing_range = 4.0
+        self.speed = 1.0
         # todo  need to add in linking an agent to a goal position
         #       terminal state is when all agents have reached their goal
         # todo  need to add concept of an obstacle
@@ -123,7 +125,7 @@ class LbcSimple(Problem):
             region_dists,
             region_prios,
         ))
-        return start_state
+        return start_state.astype('float')
 
     def reward(self, state, action):
         s_0 = state[self.state_idxs[0]]
@@ -137,21 +139,35 @@ class LbcSimple(Problem):
         return self.reward(state, action)
 
     def step(self, s, a, dt):
-        # todo
-        # for each robot: slice into state space
-        # get angle from action
-        # change pos using fixed dist/speed and angle
-        # end
-        # assign robots their own state spaces
-        # for each robot:
-        # for all other robots:
-        # check if within range, if true and closest, assign to get segment
-        import pdb
-        pdb.set_trace()
+        # update robot positions based on action
         for robot in range(self.num_robots):
-            state = s[self.state_idxs[robot]]
-            
-        return
+            action = a[robot]
+            angle = action * (2*pi / self.num_regions)
+            dx = self.speed * cos(angle[0])
+            dy = self.speed * sin(angle[0])
+            s[self.state_idxs[robot][0]] += dx
+            s[self.state_idxs[robot][1]] += dy
+
+        # update closest robots in each region
+        for robot in range(self.num_robots):
+            closest_dist = np.full(self.num_regions, self.sensing_range)  # track closest robot in each region
+            # loop over all other robots
+            for other_robot in [x for x in range(self.num_robots) if x != robot]:
+                robot_pos = s[self.state_idxs[robot]][0:2]
+                other_robot_pos = s[self.state_idxs[other_robot]][0:2]
+                dist_xy = other_robot_pos - robot_pos
+                angle = atan2(dist_xy[1], dist_xy[0])
+                action_region = round((angle * self.num_regions) / (2*pi))  # get region where other robot is in
+                dist_eucl = np.linalg.norm(dist_xy)
+
+                # todo: edge case - tie-breaking using priorities when 2 agents have same proximity
+                # update current other robot to be closest
+                if dist_eucl < closest_dist[action_region]:
+                    closest_dist[action_region] = dist_eucl
+                    s[self.state_idxs[robot][4+action_region]] = dist_eucl  # update closest robot distance in state
+                    s[self.state_idxs[robot][12+action_region]] = s[self.state_idxs[other_robot][2]]  # update priority of closest robot in state
+
+        return s
 
     def render(self, states=None, fig=None, ax=None):
         # todo
