@@ -43,9 +43,15 @@ class LbcSimple(Problem):
         self.state_dim_per_robot = 21
         self.action_dim_per_robot = 1
         self.num_regions = 8
+        self.sensing_range = 4
+        # todo  need to add in linking an agent to a goal position
+        #       terminal state is when all agents have reached their goal
+        # todo  need to add concept of an obstacle
+        #       regions in the space that are not valid locations (need to alter self.isvalid
+        self.obstacles = []
 
         self.state_dim = self.num_robots * self.state_dim_per_robot
-        self.action_dim = self.num_robots * self.state_dim_per_robot
+        self.action_dim = self.num_robots * self.action_dim_per_robot
 
         self.policy_encoding_dim = self.state_dim
         self.value_encoding_dim = self.state_dim
@@ -67,16 +73,20 @@ class LbcSimple(Problem):
             [0, self.board_size],
         ]
         for _ in range(self.num_regions):
-            self.state_lims.append([0, self.board_size])
+            self.state_lims.append([0, self.sensing_range])
         for _ in range(self.num_regions):
             self.state_lims.append([np.min(self.prio_bounds), np.max(self.prio_bounds)])
+        self.state_lims = self.state_lims * self.num_robots
 
         self.state_lims = np.asarray(self.state_lims).flatten()
         self.state_lims = self.state_lims.reshape(-1, 2)
 
-        self.action_lims = np.asarray([
+        self.action_lims = [
             [0, self.num_regions]
-        ])
+        ]
+        self.action_lims = self.action_lims * self.num_robots
+        self.action_lims = np.asarray(self.action_lims).flatten()
+        self.action_lims = self.action_lims.reshape(-1, 2)
         return
 
     def sample_action(self):
@@ -86,13 +96,32 @@ class LbcSimple(Problem):
         return sample_vector(self.state_lims)
 
     def initialize(self):
-        # todo
-        # valid = False
-        # state = None
-        # while not valid:
-        #     state = sample_vector(self.init_lims)
-        #     valid = not self.is_terminal(state)
-        return sample_vector(self.state_lims)
+        a0_start = [1, 1]
+        a0_goal = [9, 9]
+        a0_prio = 0
+
+        a1_start = [1, 9]
+        a1_goal = [9, 1]
+        a1_prio = 1
+
+        region_prios = [0] * self.num_regions
+        region_dists = [0] * self.num_regions
+
+        start_state = [
+            a0_start,
+            a0_prio,
+            a0_goal,
+            region_dists,
+            region_prios,
+            a1_start,
+            a1_prio,
+            a1_goal,
+            region_dists,
+            region_prios,
+        ]
+        start_state = np.asarray(start_state)
+        start_state = start_state.flatten()
+        return start_state
 
     def reward(self, state, action):
         rew = prio_reward(state, action, num_regions=self.num_regions)
@@ -110,9 +139,11 @@ class LbcSimple(Problem):
         return fig, ax
 
     def is_terminal(self, state):
+        # todo
         return not self.is_valid(state)
 
     def is_valid(self, state):
+        # todo
         return contains(state, self.state_lims)
 
     def policy_encoding(self, state, robot):
