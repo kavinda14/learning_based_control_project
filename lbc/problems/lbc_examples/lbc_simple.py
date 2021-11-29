@@ -11,6 +11,7 @@ from lbc.reward_functions import prio_reward
 
 
 def check_agents_param(num_agents: int, orig_parameter):
+    # todo  verify working when invalid parameters passed for multi-dimensional parameters (eg location)
     if isinstance(orig_parameter, int):
         orig_parameter = (orig_parameter,)
     if len(orig_parameter) != num_agents:
@@ -19,10 +20,16 @@ def check_agents_param(num_agents: int, orig_parameter):
     return orig_parameter
 
 
+def scan(robot_idx, state, scan_radius):
+    # todo
+    return
+
+
 class LbcSimple(Problem):
 
     def __init__(self, num_agents: int = 2, num_regions: int = 8, board_size: int = 10,
-                 agent_speeds: tuple = (1, 1), sensing_ranges: tuple = (4.0, 8.0)):
+                 agent_goals: tuple = ((9, 1), (9, 9)), agent_starts: tuple = ((1, 1), (1, 9)),
+                 agent_prios: tuple = (0, 1), agent_speeds: tuple = (1, 1), sensing_ranges: tuple = (4.0, 4.0)):
         """
         State space of individual agent:
             s[0], s[1]:                         location of agent
@@ -40,11 +47,13 @@ class LbcSimple(Problem):
         self.board_size = board_size
         self.num_robots = num_agents
         self.num_regions = num_regions
+        self.robot_prios = check_agents_param(num_agents, agent_prios)
         self.sensing_ranges = check_agents_param(num_agents, sensing_ranges)
         self.robot_speeds = check_agents_param(num_agents, agent_speeds)
+        # todo  terminal state is when all agents have reached their goal
+        self.robot_goals = check_agents_param(num_agents, agent_goals)
+        self.robot_start_locs = check_agents_param(num_agents, agent_starts)
 
-        # todo  need to add in linking an agent to a goal position
-        #       terminal state is when all agents have reached their goal
         # todo  need to add concept of an obstacle
         #       regions in the space that are not valid locations (need to alter self.isvalid
         self.obstacles = []
@@ -110,13 +119,13 @@ class LbcSimple(Problem):
         #   4: 1/5, 2/5, 3/5, 4/5
         #   ...
         #   ...
-        a0_start = [1, 1]
-        a0_goal = [9, 9]
-        a0_prio = 0
+        a0_start = self.robot_start_locs[0]
+        a0_goal = self.robot_goals[0]
+        a0_prio = self.robot_prios[0]
 
-        a1_start = [1, 9]
-        a1_goal = [9, 1]
-        a1_prio = 1
+        a1_start = self.robot_start_locs[1]
+        a1_goal = self.robot_goals[1]
+        a1_prio = self.robot_prios[1]
 
         region_dists = [0] * self.num_regions
         region_prios = [0] * self.num_regions
@@ -275,4 +284,8 @@ if __name__ == '__main__':
         next_reward = test_problem.normalized_reward(next_state, full_action)
         print(f'Reward of agent0 taking action {each_action}: {next_reward[0]}')
     ########################################
+    # Test scan
+    # todo
+    ########################################
     # Test step
+    # todo
