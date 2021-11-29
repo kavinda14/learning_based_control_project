@@ -138,7 +138,20 @@ class LbcSimple(Problem):
 
     def step(self, s, a, dt):
         # todo
-        return self.initialize()
+        # for each robot: slice into state space
+        # get angle from action
+        # change pos using fixed dist/speed and angle
+        # end
+        # assign robots their own state spaces
+        # for each robot:
+        # for all other robots:
+        # check if within range, if true and closest, assign to get segment
+        import pdb
+        pdb.set_trace()
+        for robot in range(self.num_robots):
+            state = s[self.state_idxs[robot]]
+            
+        return
 
     def render(self, states=None, fig=None, ax=None):
         # todo
@@ -186,9 +199,7 @@ class LbcSimple(Problem):
 
     def is_valid(self, state):
         # todo: obstacles
-        state = np.array([np.asarray(x) for x in state])
-        state = np.hstack(state)
-        return ((self.state_lims[:, 0] <= state).all() and (state <= self.state_lims[:, 1])).all()
+        return ((self.state_lims[:, 0] <= state).all() and (state <= self.state_lims[:, 1]).all()).all()
 
     def policy_encoding(self, state, robot):
         return state
