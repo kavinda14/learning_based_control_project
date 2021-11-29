@@ -43,37 +43,3 @@ def prio_reward(state, action: list, num_regions=8):
         reward_i = (agent_priority - priority_i) * (1 - d_xi)
         reward += reward_i
     return reward
-
-
-def prio_reward_old(priorities, goal, sensing_range, curr_state, all_agent_states, robot):
-    """
-    Calculate reward for agent at current state.
-    priorities (list): goal priorities of all agents
-    goal (tuple/list): x,y position of goal for current agent
-    range (float?): radius of sensor range of current agent
-    curr_state (tuple/list): x,y position of current agent
-    all_agent_states (list of tuples/lists): x,y positions of all other agents
-    robot (int): index of current agent
-    :return: reward
-    """
-    x = robot
-    p_x = priorities[x]
-    rx = sensing_range
-    n = len(priorities) - 1
-    pos_x = curr_state
-    d_xg = 0  # euclidean distance between pos_x and goal
-
-    reward = 1 / d_xg
-    for i in range(n):
-        p_i = priorities[i]
-        pos_i = all_agent_states[i]
-        d_xi = 0  # euclidean distance between pos_x and pos_i
-
-        indicator = 0
-        if d_xi < sensing_range:
-            indicator = 1
-
-        reward_i = (p_x - p_i) * (1 - d_xi / rx) * indicator
-        reward += reward_i
-
-    return reward
