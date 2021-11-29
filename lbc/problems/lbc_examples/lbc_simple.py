@@ -162,6 +162,7 @@ class LbcSimple(Problem):
     def step(self, s, a, dt):
         # update robot positions based on action
         for robot_idx in range(self.num_robots):
+            # todo  can't move into obstacles
             action = a[robot_idx]
             action = action - 1
             if action < 0:
@@ -237,11 +238,15 @@ class LbcSimple(Problem):
         return fig, ax
 
     def is_terminal(self, state):
-        # todo: obstacles
-        return not self.is_valid(state)
+        # todo  all agents at goal
+        all_goal = False
+        valid_state = not self.is_valid(state)
+
+        term_criteria = [valid_state, not all_goal]
+        return all(term_criteria)
 
     def is_valid(self, state):
-        # todo: obstacles
+        # todo  clean logic
         return ((self.state_lims[:, 0] <= state).all() and (state <= self.state_lims[:, 1]).all()).all()
 
     def policy_encoding(self, state, robot):
@@ -260,6 +265,8 @@ class LbcSimple(Problem):
 
 
 if __name__ == '__main__':
+    ########################################
+    # Test actions
     num_actions = 500
     test_problem = LbcSimple()
     action_history = []
