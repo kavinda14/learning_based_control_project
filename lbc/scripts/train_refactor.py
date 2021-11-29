@@ -330,7 +330,7 @@ def main():
     beta_policy = 0.5
     beta_value = 0.5
     solver_name = "PUCT_V1"
-    problem_name = "example6"
+    problem_name = "lbc_simple"
     policy_oracle_name = "gaussian"
     value_oracle_name = "deterministic"
 

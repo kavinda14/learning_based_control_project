@@ -124,7 +124,11 @@ class LbcSimple(Problem):
         return start_state
 
     def reward(self, state, action):
-        rew = prio_reward(state, action, num_regions=self.num_regions)
+        s_0 = state[self.state_idxs[0]]
+        s_1 = state[self.state_idxs[1]]
+        r_0 = prio_reward(s_0, action, num_regions=self.num_regions)
+        r_1 = prio_reward(s_1, action, num_regions=self.num_regions)
+        rew = np.asarray[[r_0], r_1]
         return rew
 
     def normalized_reward(self, state, action):
