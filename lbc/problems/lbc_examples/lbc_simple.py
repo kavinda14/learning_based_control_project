@@ -6,22 +6,23 @@ from collections import Counter
 import numpy as np
 from sympy import sin, cos, atan2, pi
 
-from lbc.problems.problem import Problem
+from lbc.problems.problem import Problem, sample_vector
 from lbc.reward_functions import prio_reward
 
 
-def sample_vector(lims, damp=0.0):
-    dim = lims.shape[0]
-    x = np.zeros((dim, 1))
-    for i in range(dim):
-        x[i] = lims[i, 0] + np.random.uniform(damp, 1 - damp) * (lims[i, 1] - lims[i, 0])
-    return x
+def check_agents_param(num_agents: int, orig_parameter):
+    if isinstance(orig_parameter, int):
+        orig_parameter = (orig_parameter,)
+    if len(orig_parameter) != num_agents:
+        each_param = orig_parameter[0]
+        orig_parameter = [each_param] * num_agents
+    return orig_parameter
 
 
 class LbcSimple(Problem):
 
-    def __init__(self, num_agents: int = 2, agent_speeds: tuple = (1, 1), num_regions: int = 8, board_size: int = 10,
-                 sensing_range: float = 4.0):
+    def __init__(self, num_agents: int = 2, num_regions: int = 8, board_size: int = 10,
+                 agent_speeds: tuple = (1, 1), sensing_ranges: tuple = (4.0, 8.0)):
         """
         State space of individual agent:
             s[0], s[1]:                         location of agent
@@ -35,18 +36,12 @@ class LbcSimple(Problem):
         """
         super(LbcSimple, self).__init__()
 
-        if isinstance(agent_speeds, int):
-            agent_speeds = (agent_speeds,)
-        if len(agent_speeds) != num_agents:
-            each_speed = agent_speeds[0]
-            self.robot_speeds = [each_speed] * num_agents
-
         self.name = "lbc_simple"
         self.board_size = board_size
         self.num_robots = num_agents
         self.num_regions = num_regions
-        self.sensing_range = sensing_range
-        self.robot_speeds = agent_speeds
+        self.sensing_ranges = check_agents_param(num_agents, sensing_ranges)
+        self.robot_speeds = check_agents_param(num_agents, agent_speeds)
 
         # todo  need to add in linking an agent to a goal position
         #       terminal state is when all agents have reached their goal
@@ -75,18 +70,19 @@ class LbcSimple(Problem):
             for each_agent in range(self.num_robots)
         ]
 
-        self.state_lims = [
-            [0, self.board_size],
-            [0, self.board_size],
-            [np.min(self.prio_bounds), np.max(self.prio_bounds)],
-            [0, self.board_size],
-            [0, self.board_size],
-        ]
-        for _ in range(self.num_regions):
-            self.state_lims.append([0, self.sensing_range])
-        for _ in range(self.num_regions):
+        self.state_lims = []
+        for robot_idx in range(self.num_robots):
+            self.state_lims.append([0, self.board_size])
+            self.state_lims.append([0, self.board_size])
             self.state_lims.append([np.min(self.prio_bounds), np.max(self.prio_bounds)])
-        self.state_lims = self.state_lims * self.num_robots
+            self.state_lims.append([0, self.board_size])
+            self.state_lims.append([0, self.board_size])
+            robot_range = self.sensing_ranges[robot_idx]
+            # maximum distance any agent is able to sense around it is the max distance for that region
+            for _ in range(self.num_regions):
+                self.state_lims.append([0, robot_range])
+            for _ in range(self.num_regions):
+                self.state_lims.append([np.min(self.prio_bounds), np.max(self.prio_bounds)])
 
         self.state_lims = np.asarray(self.state_lims).flatten()
         self.state_lims = self.state_lims.reshape(-1, 2)
@@ -169,7 +165,8 @@ class LbcSimple(Problem):
 
         # update closest robots in each region
         for robot_idx in range(self.num_robots):
-            closest_dist = np.full(self.num_regions, self.sensing_range)  # track closest robot in each region
+            robot_range = self.sensing_ranges[robot_idx]
+            closest_dist = np.full(self.num_regions, robot_range)  # track closest robot in each region
             # loop over all other robots
             for other_robot in [x for x in range(self.num_robots) if x != robot_idx]:
                 robot_pos = s[self.state_idxs[robot_idx]][0:2]
