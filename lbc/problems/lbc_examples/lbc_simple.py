@@ -143,12 +143,14 @@ class LbcSimple(Problem):
         return fig, ax
 
     def is_terminal(self, state):
-        # todo
+        # todo: obstacles
         return not self.is_valid(state)
 
     def is_valid(self, state):
-        # todo
-        return contains(state, self.state_lims)
+        # todo: obstacles
+        state = np.array([np.asarray(x) for x in state])
+        state = np.hstack(state)
+        return ((self.state_lims[:,0] <= state).all() and (state <= self.state_lims[:,1])).all()
 
     def policy_encoding(self, state, robot):
         return state
