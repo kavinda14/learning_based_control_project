@@ -20,7 +20,7 @@ def sample_vector(lims, damp=0.0):
 
 class LbcSimple(Problem):
 
-    def __init__(self):
+    def __init__(self, sensing_range: float = 4.0):
         """
         State space of individual agent:
             s[0], s[1]:                         location of agent
@@ -44,7 +44,7 @@ class LbcSimple(Problem):
         self.state_dim_per_robot = 21
         self.action_dim_per_robot = 1
         self.num_regions = 8
-        self.sensing_range = 4.0
+        self.sensing_range = sensing_range
         self.speed = 1.0
         # todo  need to add in linking an agent to a goal position
         #       terminal state is when all agents have reached their goal
@@ -83,8 +83,9 @@ class LbcSimple(Problem):
         self.state_lims = np.asarray(self.state_lims).flatten()
         self.state_lims = self.state_lims.reshape(-1, 2)
 
+        # one action to move towards each region + action for remaining still
         self.action_lims = [
-            [1, self.num_regions]
+            [1, self.num_regions + 1]
         ]
         self.action_lims = self.action_lims * self.num_robots
         self.action_lims = np.asarray(self.action_lims).flatten()
@@ -98,6 +99,13 @@ class LbcSimple(Problem):
         return sample_vector(self.state_lims)
 
     def initialize(self):
+        # todo generalize starting/goal positions based on number of agents
+        #   1: 1/2
+        #   2: 1/3, 2/3
+        #   3: 1/4, 2/4, 3/4
+        #   4: 1/5, 2/5, 3/5, 4/5
+        #   ...
+        #   ...
         a0_start = [1, 1]
         a0_goal = [9, 9]
         a0_prio = 0
@@ -142,7 +150,10 @@ class LbcSimple(Problem):
         # update robot positions based on action
         for robot in range(self.num_robots):
             action = a[robot]
-            angle = action * (2*pi / self.num_regions)
+            action = action - 1
+            if action < 0:
+                continue
+            angle = action * (2 * pi / self.num_regions)
             dx = self.speed * cos(angle[0])
             dy = self.speed * sin(angle[0])
             s[self.state_idxs[robot][0]] += dx
@@ -157,15 +168,17 @@ class LbcSimple(Problem):
                 other_robot_pos = s[self.state_idxs[other_robot]][0:2]
                 dist_xy = other_robot_pos - robot_pos
                 angle = atan2(dist_xy[1], dist_xy[0])
-                action_region = round((angle * self.num_regions) / (2*pi))  # get region where other robot is in
+                action_region = round((angle * self.num_regions) / (2 * pi))  # get region where other robot is in
                 dist_eucl = np.linalg.norm(dist_xy)
 
                 # todo: edge case - tie-breaking using priorities when 2 agents have same proximity
                 # update current other robot to be closest
                 if dist_eucl < closest_dist[action_region]:
                     closest_dist[action_region] = dist_eucl
-                    s[self.state_idxs[robot][4+action_region]] = dist_eucl  # update closest robot distance in state
-                    s[self.state_idxs[robot][12+action_region]] = s[self.state_idxs[other_robot][2]]  # update priority of closest robot in state
+                    # update closest robot distance in state
+                    s[self.state_idxs[robot][4 + action_region]] = dist_eucl
+                    # update priority of closest robot in state
+                    s[self.state_idxs[robot][12 + action_region]] = s[self.state_idxs[other_robot][2]]
 
         return s
 
@@ -246,6 +259,7 @@ if __name__ == '__main__':
     for each_num, each_count in action_counts:
         print(f'\t{each_num}: {each_count}')
     ########################################
+    # Test reward action
     a0_actions = range(1, test_problem.num_regions + 1)
     initial_reward = test_problem.normalized_reward(test_problem.initialize(), None)
     print(f'Reward initial state: {initial_reward[0]}, {initial_reward[1]}')
@@ -255,3 +269,5 @@ if __name__ == '__main__':
         next_state = test_problem.step(initial_state, full_action, dt=1)
         next_reward = test_problem.normalized_reward(next_state, full_action)
         print(f'Reward of agent0 taking action {each_action}: {next_reward[0]}')
+    ########################################
+    # Test step
