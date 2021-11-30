@@ -246,11 +246,11 @@ def eval_value(problem: Problem, learning_idx, value_oracle_name, dirname, num_v
         values.append(value)
         encodings.append(encoding.reshape((problem.value_encoding_dim, 1)))
 
-    states = np.array(states).squeeze(axis=2)
-    values = np.array(values).squeeze(axis=2)
-    encodings = np.array(encodings).squeeze(axis=2)
-    plotter.plot_value_dataset(problem, [[encodings, values]], ["Eval"])
-    plotter.save_figs("{}/value_eval_l{}.pdf".format(dirname, learning_idx))
+    # states = np.array(states).squeeze(axis=2)
+    # values = np.array(values).squeeze(axis=2)
+    # encodings = np.array(encodings).squeeze(axis=2)
+    # plotter.plot_value_dataset(problem, [[encodings, values]], ["Eval"])
+    # plotter.save_figs("{}/value_eval_l{}.pdf".format(dirname, learning_idx))
     return
 
 
@@ -282,12 +282,13 @@ def eval_policy(problem: Problem, learning_idx, policy_oracle_name, num_pi_eval,
         actions.append(action)
         encodings.append(encoding.detach().numpy().reshape((problem.policy_encoding_dim, 1)))
 
-    states = np.array(states).squeeze(axis=2)
-    actions = np.array(actions).squeeze(axis=2)
-    encodings = np.array(encodings).squeeze(axis=2)
+    # states = np.array(states).squeeze(axis=2)
+    # actions = np.array(actions).squeeze(axis=2)
+    # encodings = np.array(encodings).squeeze(axis=2)
     # plotter.plot_policy_dataset(problem,[[states,actions]],["Eval"],robot)
-    plotter.plot_policy_dataset(problem, [[encodings, actions]], ["Eval"], robot)
-    plotter.save_figs("{}/policy_eval_l{}_i{}.pdf".format(dirname, learning_idx, robot))
+    # plotter.plot_policy_dataset(problem, [[encodings, actions]], ["Eval"], robot)
+    # plotter.save_figs("{}/policy_eval_l{}_i{}.pdf".format(dirname, learning_idx, robot))
+    return
 
 
 def self_play(problem: Problem, policy_oracle, value_oracle, learning_idx, num_self_play_plots, dirname):
@@ -330,7 +331,7 @@ def main():
     beta_policy = 0.5
     beta_value = 0.5
     solver_name = "PUCT_V1"
-    problem_name = "example4"
+    problem_name = "lbc_simple"
     policy_oracle_name = "gaussian"
     value_oracle_name = "deterministic"
 
