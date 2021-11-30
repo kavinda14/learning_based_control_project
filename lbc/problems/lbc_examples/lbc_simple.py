@@ -189,10 +189,11 @@ class LbcSimple(Problem):
                 # update current other robot to be closest
                 if dist_eucl < closest_dist[action_region]:
                     closest_dist[action_region] = dist_eucl
-                    # update closest robot distance in state
-                    s[self.state_idxs[robot_idx][4 + action_region]] = dist_eucl/robot_range
                     # update priority of closest robot in state
                     s[self.state_idxs[robot_idx][12 + action_region]] = s[self.state_idxs[other_robot][2]]
+
+            # update closest robot normalized distance in state
+            s[self.state_idxs[robot_idx][5:13]] = closest_dist / robot_range
 
         return s
 
