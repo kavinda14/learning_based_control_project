@@ -89,7 +89,7 @@ class LbcSimple(Problem):
             robot_range = self.sensing_ranges[robot_idx]
             # maximum distance any agent is able to sense around it is the max distance for that region
             for _ in range(self.num_regions):
-                self.state_lims.append([0, robot_range])
+                self.state_lims.append([0, 1])
             for _ in range(self.num_regions):
                 self.state_lims.append([np.min(self.prio_bounds), np.max(self.prio_bounds)])
 
@@ -98,7 +98,7 @@ class LbcSimple(Problem):
 
         # one action to move towards each region + action for remaining still
         self.action_lims = [
-            [1, self.num_regions + 1]
+            [0, self.num_regions]
         ]
         self.action_lims = self.action_lims * self.num_robots
         self.action_lims = np.asarray(self.action_lims).flatten()
@@ -164,8 +164,7 @@ class LbcSimple(Problem):
         for robot_idx in range(self.num_robots):
             # todo  can't move into obstacles
             action = a[robot_idx]
-            action = action - 1
-            if action < 0:
+            if action == 0:
                 continue
             angle = action * (2 * pi / self.num_regions)
             dx = self.robot_speeds[robot_idx] * cos(angle[0])
@@ -191,7 +190,7 @@ class LbcSimple(Problem):
                 if dist_eucl < closest_dist[action_region]:
                     closest_dist[action_region] = dist_eucl
                     # update closest robot distance in state
-                    s[self.state_idxs[robot_idx][4 + action_region]] = dist_eucl
+                    s[self.state_idxs[robot_idx][4 + action_region]] = dist_eucl/robot_range
                     # update priority of closest robot in state
                     s[self.state_idxs[robot_idx][12 + action_region]] = s[self.state_idxs[other_robot][2]]
 
