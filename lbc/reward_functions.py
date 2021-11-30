@@ -1,20 +1,7 @@
 """
 Reward functions for lbc agent.
 """
-import math
-
-
-def distance(start_coord, end_coord, degree=2):
-    if len(start_coord) != len(end_coord):
-        raise ArithmeticError(f'Unable to compute distance between vectors of different dimensions: '
-                              f'start: {len(start_coord)} -> end: {len(end_coord)}')
-    dist = 0
-    for each_start, each_end in zip(start_coord, end_coord):
-        inner_dist = each_start - each_end
-        inner_dist = math.pow(inner_dist, degree)
-        dist += inner_dist
-    dist = math.pow(dist, 1/degree)
-    return dist
+import numpy as np
 
 
 def prio_reward(state, action: list):
@@ -38,7 +25,8 @@ def prio_reward(state, action: list):
     agent_priority = state[2]
     goal_loc = state[3:5]
 
-    dist_goal = distance(start_coord=agent_loc, end_coord=goal_loc, degree=2)
+    # todo: use diagonal from board_size to normalize instead of hardcoding
+    dist_goal = np.linalg.norm(goal_loc - agent_loc) / np.sqrt(200)  # normalized distance to goal relative to diagonal
     reward = 1 / dist_goal
 
     # closest agents detected in all regions around the agent
