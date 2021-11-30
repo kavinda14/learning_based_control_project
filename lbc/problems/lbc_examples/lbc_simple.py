@@ -58,7 +58,10 @@ class LbcSimple(Problem):
         #       regions in the space that are not valid locations (need to alter self.isvalid
         self.obstacles = []
 
+        self.t0 = 0
+        self.tf = 100
         self.dt = 1
+        self.times = np.arange(self.t0, self.tf, self.dt)  # num of eval iterations in run_instance in run.py
         self.gamma = 1.0
         self.prio_bounds = np.asarray([0, 1])
         self.state_dim_per_robot = 21
@@ -127,7 +130,7 @@ class LbcSimple(Problem):
         a1_goal = self.robot_goals[1]
         a1_prio = self.robot_prios[1]
 
-        region_dists = [0] * self.num_regions
+        region_dists = [1.0] * self.num_regions
         region_prios = [0] * self.num_regions
         # These two lines can be used to test these entries in the state spaces as they will
         # create distinct values rather than all 0's
