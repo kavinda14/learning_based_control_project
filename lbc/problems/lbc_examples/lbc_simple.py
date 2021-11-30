@@ -149,6 +149,7 @@ class LbcSimple(Problem):
         return start_state.astype('float')
 
     def reward(self, state, action):
+        # todo  generalize to variable number of agents
         s_0 = state[self.state_idxs[0]]
         s_1 = state[self.state_idxs[1]]
         r_0 = prio_reward(s_0, action)
@@ -194,7 +195,6 @@ class LbcSimple(Problem):
                     s[self.state_idxs[robot_idx][4 + action_region]] = dist_eucl
                     # update priority of closest robot in state
                     s[self.state_idxs[robot_idx][12 + action_region]] = s[self.state_idxs[other_robot][2]]
-
         return s
 
     def render(self, states=None, fig=None, ax=None):

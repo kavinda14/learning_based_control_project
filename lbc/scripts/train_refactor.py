@@ -321,8 +321,8 @@ def self_play(problem: Problem, policy_oracle, value_oracle, learning_idx, num_s
 
 
 def main():
-    num_simulations = 2000
-    search_depth = 100
+    num_simulations = 20
+    search_depth = 5
     c_pw = 2.0
     alpha_pw = 0.5
     c_exp = 1.0
@@ -330,7 +330,7 @@ def main():
     beta_policy = 0.5
     beta_value = 0.5
     solver_name = "PUCT_V1"
-    problem_name = "lbc_simple"
+    problem_name = "example4"
     policy_oracle_name = "gaussian"
     value_oracle_name = "deterministic"
 
@@ -340,14 +340,14 @@ def main():
     learning_iters = 40
     # 0: weighted sum, 1: best child, 2: subsamples
     mode = 1
-    num_d_pi = 2000
-    num_pi_eval = 2000
-    num_d_v = 10000
-    num_v_eval = 5000
+    num_d_pi = 20
+    num_pi_eval = 20
+    num_d_v = 20
+    num_v_eval = 20
     num_subsamples = 5
     num_self_play_plots = 10
     learning_rate = 0.001
-    num_epochs = 200
+    num_epochs = 20
     batch_size = 1028
     train_size = 0.8
 

@@ -38,6 +38,7 @@ class DeterministicPolicyNetwork(torch.nn.Module):
 
         if path is not None:
             self.load_state_dict(torch.load(path))
+        return
 
     def to(self, device):
         self.device = device
