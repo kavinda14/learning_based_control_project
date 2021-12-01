@@ -251,6 +251,7 @@ class LbcSimple(Problem):
         # todo  all agents at goal
         all_goal = False
         valid_state = not self.is_valid(state)
+        # todo  check collision
 
         term_criteria = [valid_state, not all_goal]
         return all(term_criteria)
