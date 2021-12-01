@@ -307,7 +307,7 @@ if __name__ == '__main__':
     print(f'Reward initial state: {initial_reward[0]}, {initial_reward[1]}')
     for each_action in a0_actions:
         full_action = np.asarray([[0], each_action])
-        initial_state = test_problem.step(initial_state, full_action)
+        initial_state = test_problem.step(initial_state, full_action, dt=1)
         next_state = test_problem.step(initial_state, full_action, dt=1)
         next_reward = test_problem.normalized_reward(next_state, full_action)
         print(f'Reward of agent0 taking action {each_action}: {next_reward[0]}')
