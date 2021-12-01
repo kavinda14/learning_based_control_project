@@ -297,9 +297,22 @@ if __name__ == '__main__':
     for each_num, each_count in action_counts:
         print(f'\t{each_num}: {each_count}')
     ########################################
-    # Test reward action
+    # Test initial reward action
     a0_actions = range(1, test_problem.num_regions + 1)
-    initial_reward = test_problem.normalized_reward(test_problem.initialize(), None)
+    initial_state = test_problem.initialize()
+    initial_reward = test_problem.normalized_reward(initial_state, None)
+    print(f'Reward initial state: {initial_reward[0]}, {initial_reward[1]}')
+    for each_action in a0_actions:
+        full_action = np.asarray([[0], each_action])
+        initial_state = test_problem.step(initial_state, full_action)
+        next_state = test_problem.step(initial_state, full_action, dt=1)
+        next_reward = test_problem.normalized_reward(next_state, full_action)
+        print(f'Reward of agent0 taking action {each_action}: {next_reward[0]}')
+    ########################################
+    # Test initial reward action
+    a0_actions = range(1, test_problem.num_regions + 1)
+    intial_state = test_problem.initialize()
+    initial_reward = test_problem.normalized_reward(intial_state, None)
     print(f'Reward initial state: {initial_reward[0]}, {initial_reward[1]}')
     for each_action in a0_actions:
         full_action = np.asarray([[0], each_action])

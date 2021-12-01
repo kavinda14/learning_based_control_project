@@ -181,8 +181,7 @@ def train_model(problem: Problem, train_dataset, test_dataset, learning_idx, pol
     model.to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-    scheduler = ReduceLROnPlateau(optimizer, 'min',
-                                  factor=0.5, patience=50, min_lr=1e-4, verbose=True)
+    scheduler = ReduceLROnPlateau(optimizer, 'min', factor=0.5, patience=50, min_lr=1e-4, verbose=True)
 
     train_dataset.to(device)
     test_dataset.to(device)
