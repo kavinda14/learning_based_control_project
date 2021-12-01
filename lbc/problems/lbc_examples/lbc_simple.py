@@ -61,7 +61,7 @@ class LbcSimple(Problem):
         self.obstacles = []
 
         self.t0 = 0
-        self.tf = 100
+        self.tf = 50
         self.dt = 1
         self.times = np.arange(self.t0, self.tf, self.dt)  # num of eval iterations in run_instance in run.py
         self.gamma = 1.0
@@ -188,9 +188,15 @@ class LbcSimple(Problem):
                 robot_pos = ns[self.state_idxs[robot_idx]][0:2]
                 other_robot_pos = ns[self.state_idxs[other_robot]][0:2]
                 dist_xy = other_robot_pos - robot_pos
+
+                # when robots are at same position
+                if dist_xy == 0:
+                    continue
+
                 angle = atan2(dist_xy[1], dist_xy[0])
                 action_region = round((angle * self.num_regions) / (2 * pi))  # get region where other robot is in
                 dist_eucl = np.linalg.norm(dist_xy)
+                # todo: robots colliding, dist_xy=0
 
                 # todo: edge case - tie-breaking using priorities when 2 agents have same proximity
                 # update current other robot to be closest
