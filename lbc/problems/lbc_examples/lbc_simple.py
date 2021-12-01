@@ -2,10 +2,12 @@
 3d double integrator , multi robot uncooperative target
 """
 from collections import Counter
+import copy
 
 import numpy as np
 from sympy import sin, cos, atan2, pi
 
+from lbc import plotter
 from lbc.problems.problem import Problem, sample_vector
 from lbc.reward_functions import prio_reward
 
@@ -164,6 +166,7 @@ class LbcSimple(Problem):
         return self.reward(state, action)
 
     def step(self, s, a, dt):
+        ns = copy.deepcopy(s)
         # update robot positions based on action
         for robot_idx in range(self.num_robots):
             # todo  can't move into obstacles
@@ -173,8 +176,8 @@ class LbcSimple(Problem):
             angle = action * (2 * pi / self.num_regions)
             dx = self.robot_speeds[robot_idx] * cos(angle[0])
             dy = self.robot_speeds[robot_idx] * sin(angle[0])
-            s[self.state_idxs[robot_idx][0]] += dx
-            s[self.state_idxs[robot_idx][1]] += dy
+            ns[self.state_idxs[robot_idx][0]] += dx
+            ns[self.state_idxs[robot_idx][1]] += dy
 
         # update closest robots in each region
         for robot_idx in range(self.num_robots):
@@ -182,8 +185,8 @@ class LbcSimple(Problem):
             closest_dist = np.full(self.num_regions, robot_range)  # track closest robot in each region
             # loop over all other robots
             for other_robot in [x for x in range(self.num_robots) if x != robot_idx]:
-                robot_pos = s[self.state_idxs[robot_idx]][0:2]
-                other_robot_pos = s[self.state_idxs[other_robot]][0:2]
+                robot_pos = ns[self.state_idxs[robot_idx]][0:2]
+                other_robot_pos = ns[self.state_idxs[other_robot]][0:2]
                 dist_xy = other_robot_pos - robot_pos
                 angle = atan2(dist_xy[1], dist_xy[0])
                 action_region = round((angle * self.num_regions) / (2 * pi))  # get region where other robot is in
@@ -194,48 +197,53 @@ class LbcSimple(Problem):
                 if dist_eucl < closest_dist[action_region]:
                     closest_dist[action_region] = dist_eucl
                     # update priority of closest robot in state
-                    s[self.state_idxs[robot_idx][12 + action_region]] = s[self.state_idxs[other_robot][2]]
+                    ns[self.state_idxs[robot_idx][12 + action_region]] = ns[self.state_idxs[other_robot][2]]
             # update closest robot normalized distance in state
-            s[self.state_idxs[robot_idx][5:13]] = closest_dist / robot_range
-        return s
+            ns[self.state_idxs[robot_idx][5:13]] = closest_dist / robot_range
+        return ns
 
     def render(self, states=None, fig=None, ax=None):
-        # todo
         if fig is None or ax is None:
-            fig, ax = plotter.make_3d_fig()
+            fig, ax = plotter.make_fig()
 
         if states is not None:
-
             lims = self.state_lims
             colors = plotter.get_n_colors(self.num_robots)
             for robot in range(self.num_robots):
                 robot_state_idxs = self.state_idxs[robot]
 
-                ax.plot(states[:, robot_state_idxs[0]].squeeze(axis=1), states[:, robot_state_idxs[1]].squeeze(axis=1),
-                        states[:, robot_state_idxs[2]].squeeze(axis=1), color=colors[robot])
-                ax.plot(states[0, robot_state_idxs[0]], states[0, robot_state_idxs[1]], states[0, robot_state_idxs[2]],
-                        color=colors[robot], marker='o')
-                ax.plot(states[-1, robot_state_idxs[0]], states[-1, robot_state_idxs[1]],
-                        states[-1, robot_state_idxs[2]], color=colors[robot], marker='s')
+                ax.plot(states[:, robot_state_idxs[0]],
+                        states[:, robot_state_idxs[1]],
+                        color=colors[robot])
+                # ax.plot(states[0, robot_state_idxs[0]],
+                #         states[0, robot_state_idxs[1]],
+                #         states[0, robot_state_idxs[2]],
+                #         color=colors[robot], marker='o')
+                # ax.plot(states[-1, robot_state_idxs[0]],
+                #         states[-1, robot_state_idxs[1]],
+                #         states[-1, robot_state_idxs[2]],
+                #         color=colors[robot], marker='s')
 
                 # projections
-                ax.plot(lims[0, 0] * np.ones(states.shape[0]), states[:, robot_state_idxs[1]].squeeze(),
-                        states[:, robot_state_idxs[2]].squeeze(),
-                        color=colors[robot], linewidth=1, linestyle="--")
-                ax.plot(states[:, robot_state_idxs[0]].squeeze(), lims[1, 1] * np.ones(states.shape[0]),
-                        states[:, robot_state_idxs[2]].squeeze(),
-                        color=colors[robot], linewidth=1, linestyle="--")
-                ax.plot(states[:, robot_state_idxs[0]].squeeze(), states[:, robot_state_idxs[1]].squeeze(),
-                        lims[2, 0] * np.ones(states.shape[0]),
-                        color=colors[robot], linewidth=1, linestyle="--")
+                # ax.plot(lims[0, 0] * np.ones(states.shape[0]), states[:, robot_state_idxs[1]].squeeze(),
+                #         states[:, robot_state_idxs[2]].squeeze(),
+                #         color=colors[robot], linewidth=1, linestyle="--")
+                # ax.plot(states[:, robot_state_idxs[0]].squeeze(), lims[1, 1] * np.ones(states.shape[0]),
+                #         states[:, robot_state_idxs[2]].squeeze(),
+                #         color=colors[robot], linewidth=1, linestyle="--")
+                # ax.plot(states[:, robot_state_idxs[0]].squeeze(), states[:, robot_state_idxs[1]].squeeze(),
+                #         lims[2, 0] * np.ones(states.shape[0]),
+                #         color=colors[robot], linewidth=1, linestyle="--")
 
             ax.set_xlim((lims[0, 0], lims[0, 1]))
             ax.set_ylim((lims[1, 0], lims[1, 1]))
-            ax.set_zlim((lims[2, 0], lims[2, 1]))
-            ax.set_box_aspect((lims[0, 1] - lims[0, 0], lims[1, 1] - lims[1, 0], lims[2, 1] - lims[2, 0]))
+            # ax.set_box_aspect((
+            #     lims[0, 1] - lims[0, 0],
+            #     lims[1, 1] - lims[1, 0]
+            # ))
 
             for robot in range(self.num_robots):
-                ax.scatter(np.nan, np.nan, np.nan, color=colors[robot], label="Robot {}".format(robot))
+                ax.scatter(np.nan, np.nan, np.nan, color=colors[robot], label=f'Robot {robot}')
             ax.legend(loc='best')
         return fig, ax
 

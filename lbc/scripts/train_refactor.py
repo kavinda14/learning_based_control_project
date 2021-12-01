@@ -318,7 +318,8 @@ def self_play(problem: Problem, policy_oracle, value_oracle, learning_idx, num_s
     # if hasattr(problem, 'pretty_plot'):
     #     problem.pretty_plot(sim_results[0])
 
-    # plotter.save_figs("{}/self_play_l{}.pdf".format(dirname, learning_idx))
+    # todo
+    plotter.save_figs("{}/self_play_l{}.pdf".format(dirname, learning_idx))
     return sim_results
 
 
