@@ -30,11 +30,11 @@ def prio_reward(state, action: list):
     reward = 1 / dist_goal
 
     # closest agents detected in all regions around the agent
-    region_info = state[5:]
-    mid_idx = len(region_info)//2
-    dist_info = region_info[:mid_idx]
-    prio_info = region_info[mid_idx:]
-    for each_dist, each_prio in zip(dist_info, prio_info):
-        reward_i = (agent_priority - each_prio) * (1 - each_dist)
-        reward += reward_i
+    # region_info = state[5:]
+    # mid_idx = len(region_info)//2
+    # dist_info = region_info[:mid_idx]
+    # prio_info = region_info[mid_idx:]
+    # for each_dist, each_prio in zip(dist_info, prio_info):
+    #     reward_i = (agent_priority - each_prio) * (1 - each_dist)
+    #     reward += reward_i
     return reward

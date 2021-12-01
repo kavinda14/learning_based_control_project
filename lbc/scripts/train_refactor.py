@@ -323,14 +323,14 @@ def self_play(problem: Problem, policy_oracle, value_oracle, learning_idx, num_s
 
 
 def main():
-    num_simulations = 50
-    search_depth = 15
-    learning_iters = 50
-    num_epochs = 20
-    num_d_pi = 200
-    num_pi_eval = 200
-    num_d_v = 200
-    num_v_eval = 200
+    search_depth = 25
+    learning_iters = 100
+    num_simulations = 100
+    num_epochs = 100
+    num_d_pi = 100
+    num_d_v = 100
+    num_pi_eval = 100
+    num_v_eval = 100
     num_subsamples = 50
 
     c_pw = 2.0
@@ -340,10 +340,8 @@ def main():
     beta_policy = 0.5
     beta_value = 0.5
     solver_name = "PUCT_V1"
-    problem_name = "lbc_simple"
     policy_oracle_name = "gaussian"
     value_oracle_name = "deterministic"
-    dirname = "../current/models"
 
     # 0: weighted sum, 1: best child, 2: subsamples
     mode = 1
@@ -351,6 +349,9 @@ def main():
     learning_rate = 0.001
     batch_size = 1028
     train_size = 0.8
+
+    problem_name = "lbc_simple"
+    dirname = "../current/models"
 
     problem: Problem = get_problem(problem_name)
     format_dir(clean_dirnames=["data", "models"])
