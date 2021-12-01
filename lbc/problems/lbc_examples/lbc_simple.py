@@ -2,6 +2,7 @@
 3d double integrator , multi robot uncooperative target
 """
 from collections import Counter
+import copy
 
 import numpy as np
 from sympy import sin, cos, atan2, pi
@@ -164,6 +165,7 @@ class LbcSimple(Problem):
         return self.reward(state, action)
 
     def step(self, s, a, dt):
+        ns = copy.deepcopy(s)
         # update robot positions based on action
         for robot_idx in range(self.num_robots):
             # todo  can't move into obstacles
@@ -173,8 +175,8 @@ class LbcSimple(Problem):
             angle = action * (2 * pi / self.num_regions)
             dx = self.robot_speeds[robot_idx] * cos(angle[0])
             dy = self.robot_speeds[robot_idx] * sin(angle[0])
-            s[self.state_idxs[robot_idx][0]] += dx
-            s[self.state_idxs[robot_idx][1]] += dy
+            ns[self.state_idxs[robot_idx][0]] += dx
+            ns[self.state_idxs[robot_idx][1]] += dy
 
         # update closest robots in each region
         for robot_idx in range(self.num_robots):
@@ -182,8 +184,8 @@ class LbcSimple(Problem):
             closest_dist = np.full(self.num_regions, robot_range)  # track closest robot in each region
             # loop over all other robots
             for other_robot in [x for x in range(self.num_robots) if x != robot_idx]:
-                robot_pos = s[self.state_idxs[robot_idx]][0:2]
-                other_robot_pos = s[self.state_idxs[other_robot]][0:2]
+                robot_pos = ns[self.state_idxs[robot_idx]][0:2]
+                other_robot_pos = ns[self.state_idxs[other_robot]][0:2]
                 dist_xy = other_robot_pos - robot_pos
                 angle = atan2(dist_xy[1], dist_xy[0])
                 action_region = round((angle * self.num_regions) / (2 * pi))  # get region where other robot is in
@@ -194,10 +196,10 @@ class LbcSimple(Problem):
                 if dist_eucl < closest_dist[action_region]:
                     closest_dist[action_region] = dist_eucl
                     # update priority of closest robot in state
-                    s[self.state_idxs[robot_idx][12 + action_region]] = s[self.state_idxs[other_robot][2]]
+                    ns[self.state_idxs[robot_idx][12 + action_region]] = ns[self.state_idxs[other_robot][2]]
             # update closest robot normalized distance in state
-            s[self.state_idxs[robot_idx][5:13]] = closest_dist / robot_range
-        return s
+            ns[self.state_idxs[robot_idx][5:13]] = closest_dist / robot_range
+        return ns
 
     def render(self, states=None, fig=None, ax=None):
         # todo
