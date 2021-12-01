@@ -190,7 +190,7 @@ class LbcSimple(Problem):
                 dist_xy = other_robot_pos - robot_pos
 
                 # when robots are at same position
-                if dist_xy == 0:
+                if (dist_xy == 0).all():
                     # set priorities to be larger
                     ns[self.state_idxs[robot_idx][12:]] = 2 * ns[self.state_idxs[other_robot][2]]
                     # set distances to be 0
