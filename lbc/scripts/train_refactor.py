@@ -5,7 +5,7 @@ from queue import Queue
 import numpy as np
 import torch
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-from tqdm import tqdm
+# from tqdm import tqdm
 
 from lbc import plotter
 from lbc.learning.oracles import get_oracles
@@ -20,7 +20,7 @@ def worker_edp(seed, fn, problem: Problem, robot, num_per_pool, solver, mode, nu
 
     robot_action_idx = problem.action_idxs[robot]
     count = 0
-    pbar = tqdm(total=num_per_pool)
+    # pbar = tqdm(total=num_per_pool)
     while count < num_per_pool:
         state = problem.initialize()
         root_node = solver.search(problem, state, turn=robot)
@@ -48,7 +48,7 @@ def worker_edp(seed, fn, problem: Problem, robot, num_per_pool, solver, mode, nu
                     datapoint = np.append(encoding, target)
                     datapoints.append(datapoint)
             count += 1
-            pbar.update(1)
+            # pbar.update(1)
     np.save(fn, np.array(datapoints))
     return datapoints
 
@@ -97,7 +97,7 @@ def worker_edv(fn, seed, problem: Problem, num_states_per_pool, policy_oracle):
     np.random.seed(seed)
 
     datapoints = []
-    pbar = tqdm(total=num_states_per_pool)
+    # pbar = tqdm(total=num_states_per_pool)
     while len(datapoints) < num_states_per_pool:
         state = problem.initialize()
         instance["initial_state"] = state
@@ -106,7 +106,7 @@ def worker_edv(fn, seed, problem: Problem, num_states_per_pool, policy_oracle):
         encoding = problem.value_encoding(state).squeeze()
         datapoint = np.append(encoding, value)
         datapoints.append(datapoint)
-        pbar.update(1)
+        # pbar.update(1)
     np.save(fn, np.array(datapoints))
     return datapoints
 
@@ -193,7 +193,8 @@ def train_model(problem: Problem, train_dataset, test_dataset, learning_idx, pol
 
     losses = []
     best_test_loss = np.Inf
-    for _ in tqdm(range(num_epochs)):
+    # pbar = tqdm(num_epochs)
+    for _ in range(num_epochs):
         train_epoch_loss = train(model, optimizer, train_loader)
         test_epoch_loss = test(model, test_loader)
         scheduler.step(test_epoch_loss)
@@ -310,20 +311,28 @@ def self_play(problem: Problem, policy_oracle, value_oracle, learning_idx, num_s
         sim_result = run_instance(0, Queue(), 0, instance, verbose=False, tqdm_on=False)
         sim_results.append(sim_result)
 
-    for sim_result in sim_results:
-        plotter.plot_sim_result(sim_result)
-        problem.render(states=sim_result["states"])
+    # for sim_result in sim_results:
+    #     plotter.plot_sim_result(sim_result)
+    #     problem.render(states=sim_result["states"])
 
-    if hasattr(problem, 'pretty_plot'):
-        problem.pretty_plot(sim_results[0])
+    # if hasattr(problem, 'pretty_plot'):
+    #     problem.pretty_plot(sim_results[0])
 
-    plotter.save_figs("{}/self_play_l{}.pdf".format(dirname, learning_idx))
+    # plotter.save_figs("{}/self_play_l{}.pdf".format(dirname, learning_idx))
     return sim_results
 
 
 def main():
-    num_simulations = 20
-    search_depth = 5
+    num_simulations = 50
+    search_depth = 15
+    learning_iters = 50
+    num_epochs = 20
+    num_d_pi = 200
+    num_pi_eval = 200
+    num_d_v = 200
+    num_v_eval = 200
+    num_subsamples = 50
+
     c_pw = 2.0
     alpha_pw = 0.5
     c_exp = 1.0
@@ -332,23 +341,14 @@ def main():
     beta_value = 0.5
     solver_name = "PUCT_V1"
     problem_name = "lbc_simple"
-    policy_oracle_name = "gaussian"
+    policy_oracle_name = "deterministic"
     value_oracle_name = "deterministic"
-
     dirname = "../current/models"
 
-    # learning
-    learning_iters = 40
     # 0: weighted sum, 1: best child, 2: subsamples
     mode = 1
-    num_d_pi = 20
-    num_pi_eval = 20
-    num_d_v = 20
-    num_v_eval = 20
-    num_subsamples = 5
     num_self_play_plots = 10
     learning_rate = 0.001
-    num_epochs = 20
     batch_size = 1028
     train_size = 0.8
 
