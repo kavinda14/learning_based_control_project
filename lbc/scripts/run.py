@@ -8,6 +8,9 @@ from lbc.learning.oracles import get_oracles
 from lbc.param import Param
 from lbc.util import init_tqdm, update_tqdm, get_problem, get_solver
 
+import matplotlib.pyplot as plt
+import matplotlib
+
 
 def make_instance(param):
     instance = dict()
@@ -148,7 +151,8 @@ if __name__ == '__main__':
         pool.join()
     else:
         instance = make_instance(param)
-        sim_results = [run_instance(0, Queue(), len(instance["problem"].times), instance, verbose=True)]
+        # sim_results = [run_instance(0, Queue(), len(instance["problem"].times), instance, verbose=True)]
+        sim_results = run_instance(0, Queue(), len(instance["problem"].times), instance, verbose=True)
 
     if param.movie_on:
         print('making movie...')
@@ -160,11 +164,44 @@ if __name__ == '__main__':
 
     # plotting
     print('plotting results...')
-    for sim_result in sim_results:
-        plotter.plot_sim_result(sim_result)
-        sim_result["instance"]["problem"].render(states=sim_result["states"])
-        if param.pretty_plot_on and hasattr(sim_result["instance"]["problem"], 'pretty_plot'):
-            sim_result["instance"]["problem"].pretty_plot(sim_result)
+    plt.xlim(0, 11)
+    plt.ylim(0, 11)
+    matplotlib.use('TkAgg')
+    x_coords1 = []
+    y_coords1 = []
+    x_coords2 = []
+    y_coords2 = []
+    # for sim_result in sim_results:
+    #     states = sim_result["states"]
+    #     print(len(states))
 
-    plotter.save_figs("../current/plots/run.pdf")
-    plotter.open_figs("../current/plots/run.pdf")
+    #     for i_state in states:
+    #         x_coords1.append(i_state[0])
+    #         y_coords1.append(i_state[1])
+    #         x_coords2.append(i_state[21])
+    #         y_coords2.append(i_state[22])   
+    
+    states = sim_results["states"]
+    print(len(states))
+
+    for i_state in states:
+        x_coords1.append(i_state[0])
+        y_coords1.append(i_state[1])
+        x_coords2.append(i_state[21])
+        y_coords2.append(i_state[22])   
+
+    print(x_coords1)
+    print(y_coords1)
+    print(x_coords2)
+    print(y_coords2)
+    plt.plot(x_coords1, y_coords1)
+    plt.plot(x_coords2, y_coords2)
+    plt.show()
+
+    #     plotter.plot_sim_result(sim_result)
+    #     sim_result["instance"]["problem"].render(states=sim_result["states"])
+    #     if param.pretty_plot_on and hasattr(sim_result["instance"]["problem"], 'pretty_plot'):
+    #         sim_result["instance"]["problem"].pretty_plot(sim_result)
+
+    # plotter.save_figs("../current/plots/run.pdf")
+    # plotter.open_figs("../current/plots/run.pdf")
