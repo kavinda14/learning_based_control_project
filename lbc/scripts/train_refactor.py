@@ -317,13 +317,24 @@ def self_play(problem: Problem, policy_oracle, value_oracle, learning_idx, num_s
     if hasattr(problem, 'pretty_plot'):
         problem.pretty_plot(sim_results[0])
 
+    # todo
     plotter.save_figs("{}/self_play_l{}.pdf".format(dirname, learning_idx))
     return sim_results
 
 
 def main():
-    num_simulations = 20
+    num_simulations = 5
     search_depth = 5
+    learning_iters = 40
+    num_d_pi = 20
+    num_pi_eval = 20
+    num_d_v = 20
+    num_v_eval = 20
+    num_subsamples = 5
+    num_epochs = 20
+
+    num_self_play_plots = 10
+
     c_pw = 2.0
     alpha_pw = 0.5
     c_exp = 1.0
@@ -334,21 +345,11 @@ def main():
     problem_name = "lbc_simple"
     policy_oracle_name = "gaussian"
     value_oracle_name = "deterministic"
-
     dirname = "../current/models"
 
-    # learning
-    learning_iters = 40
     # 0: weighted sum, 1: best child, 2: subsamples
     mode = 1
-    num_d_pi = 20
-    num_pi_eval = 20
-    num_d_v = 20
-    num_v_eval = 20
-    num_subsamples = 5
-    num_self_play_plots = 10
     learning_rate = 0.001
-    num_epochs = 20
     batch_size = 1028
     train_size = 0.8
 
