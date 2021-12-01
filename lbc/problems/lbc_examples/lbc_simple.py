@@ -7,6 +7,7 @@ import copy
 import numpy as np
 from sympy import sin, cos, atan2, pi
 
+from lbc import plotter
 from lbc.problems.problem import Problem, sample_vector
 from lbc.reward_functions import prio_reward
 
@@ -202,42 +203,47 @@ class LbcSimple(Problem):
         return ns
 
     def render(self, states=None, fig=None, ax=None):
-        # todo
         if fig is None or ax is None:
-            fig, ax = plotter.make_3d_fig()
+            fig, ax = plotter.make_fig()
 
         if states is not None:
-
             lims = self.state_lims
             colors = plotter.get_n_colors(self.num_robots)
             for robot in range(self.num_robots):
                 robot_state_idxs = self.state_idxs[robot]
 
-                ax.plot(states[:, robot_state_idxs[0]].squeeze(axis=1), states[:, robot_state_idxs[1]].squeeze(axis=1),
-                        states[:, robot_state_idxs[2]].squeeze(axis=1), color=colors[robot])
-                ax.plot(states[0, robot_state_idxs[0]], states[0, robot_state_idxs[1]], states[0, robot_state_idxs[2]],
-                        color=colors[robot], marker='o')
-                ax.plot(states[-1, robot_state_idxs[0]], states[-1, robot_state_idxs[1]],
-                        states[-1, robot_state_idxs[2]], color=colors[robot], marker='s')
+                ax.plot(states[:, robot_state_idxs[0]],
+                        states[:, robot_state_idxs[1]],
+                        color=colors[robot])
+                # ax.plot(states[0, robot_state_idxs[0]],
+                #         states[0, robot_state_idxs[1]],
+                #         states[0, robot_state_idxs[2]],
+                #         color=colors[robot], marker='o')
+                # ax.plot(states[-1, robot_state_idxs[0]],
+                #         states[-1, robot_state_idxs[1]],
+                #         states[-1, robot_state_idxs[2]],
+                #         color=colors[robot], marker='s')
 
                 # projections
-                ax.plot(lims[0, 0] * np.ones(states.shape[0]), states[:, robot_state_idxs[1]].squeeze(),
-                        states[:, robot_state_idxs[2]].squeeze(),
-                        color=colors[robot], linewidth=1, linestyle="--")
-                ax.plot(states[:, robot_state_idxs[0]].squeeze(), lims[1, 1] * np.ones(states.shape[0]),
-                        states[:, robot_state_idxs[2]].squeeze(),
-                        color=colors[robot], linewidth=1, linestyle="--")
-                ax.plot(states[:, robot_state_idxs[0]].squeeze(), states[:, robot_state_idxs[1]].squeeze(),
-                        lims[2, 0] * np.ones(states.shape[0]),
-                        color=colors[robot], linewidth=1, linestyle="--")
+                # ax.plot(lims[0, 0] * np.ones(states.shape[0]), states[:, robot_state_idxs[1]].squeeze(),
+                #         states[:, robot_state_idxs[2]].squeeze(),
+                #         color=colors[robot], linewidth=1, linestyle="--")
+                # ax.plot(states[:, robot_state_idxs[0]].squeeze(), lims[1, 1] * np.ones(states.shape[0]),
+                #         states[:, robot_state_idxs[2]].squeeze(),
+                #         color=colors[robot], linewidth=1, linestyle="--")
+                # ax.plot(states[:, robot_state_idxs[0]].squeeze(), states[:, robot_state_idxs[1]].squeeze(),
+                #         lims[2, 0] * np.ones(states.shape[0]),
+                #         color=colors[robot], linewidth=1, linestyle="--")
 
             ax.set_xlim((lims[0, 0], lims[0, 1]))
             ax.set_ylim((lims[1, 0], lims[1, 1]))
-            ax.set_zlim((lims[2, 0], lims[2, 1]))
-            ax.set_box_aspect((lims[0, 1] - lims[0, 0], lims[1, 1] - lims[1, 0], lims[2, 1] - lims[2, 0]))
+            # ax.set_box_aspect((
+            #     lims[0, 1] - lims[0, 0],
+            #     lims[1, 1] - lims[1, 0]
+            # ))
 
             for robot in range(self.num_robots):
-                ax.scatter(np.nan, np.nan, np.nan, color=colors[robot], label="Robot {}".format(robot))
+                ax.scatter(np.nan, np.nan, np.nan, color=colors[robot], label=f'Robot {robot}')
             ax.legend(loc='best')
         return fig, ax
 

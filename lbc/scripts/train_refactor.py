@@ -246,11 +246,11 @@ def eval_value(problem: Problem, learning_idx, value_oracle_name, dirname, num_v
         values.append(value)
         encodings.append(encoding.reshape((problem.value_encoding_dim, 1)))
 
-    states = np.array(states).squeeze(axis=2)
-    values = np.array(values).squeeze(axis=2)
-    encodings = np.array(encodings).squeeze(axis=2)
-    plotter.plot_value_dataset(problem, [[encodings, values]], ["Eval"])
-    plotter.save_figs("{}/value_eval_l{}.pdf".format(dirname, learning_idx))
+    # states = np.array(states).squeeze(axis=2)
+    # values = np.array(values).squeeze(axis=2)
+    # encodings = np.array(encodings).squeeze(axis=2)
+    # plotter.plot_value_dataset(problem, [[encodings, values]], ["Eval"])
+    # plotter.save_figs("{}/value_eval_l{}.pdf".format(dirname, learning_idx))
     return
 
 
@@ -282,12 +282,13 @@ def eval_policy(problem: Problem, learning_idx, policy_oracle_name, num_pi_eval,
         actions.append(action)
         encodings.append(encoding.detach().numpy().reshape((problem.policy_encoding_dim, 1)))
 
-    states = np.array(states).squeeze(axis=2)
-    actions = np.array(actions).squeeze(axis=2)
-    encodings = np.array(encodings).squeeze(axis=2)
+    # states = np.array(states).squeeze(axis=2)
+    # actions = np.array(actions).squeeze(axis=2)
+    # encodings = np.array(encodings).squeeze(axis=2)
     # plotter.plot_policy_dataset(problem,[[states,actions]],["Eval"],robot)
-    plotter.plot_policy_dataset(problem, [[encodings, actions]], ["Eval"], robot)
-    plotter.save_figs("{}/policy_eval_l{}_i{}.pdf".format(dirname, learning_idx, robot))
+    # plotter.plot_policy_dataset(problem, [[encodings, actions]], ["Eval"], robot)
+    # plotter.save_figs("{}/policy_eval_l{}_i{}.pdf".format(dirname, learning_idx, robot))
+    return
 
 
 def self_play(problem: Problem, policy_oracle, value_oracle, learning_idx, num_self_play_plots, dirname):
@@ -316,13 +317,24 @@ def self_play(problem: Problem, policy_oracle, value_oracle, learning_idx, num_s
     if hasattr(problem, 'pretty_plot'):
         problem.pretty_plot(sim_results[0])
 
+    # todo
     plotter.save_figs("{}/self_play_l{}.pdf".format(dirname, learning_idx))
     return sim_results
 
 
 def main():
-    num_simulations = 20
+    num_simulations = 5
     search_depth = 5
+    learning_iters = 40
+    num_d_pi = 20
+    num_pi_eval = 20
+    num_d_v = 20
+    num_v_eval = 20
+    num_subsamples = 5
+    num_epochs = 20
+
+    num_self_play_plots = 10
+
     c_pw = 2.0
     alpha_pw = 0.5
     c_exp = 1.0
@@ -330,24 +342,14 @@ def main():
     beta_policy = 0.5
     beta_value = 0.5
     solver_name = "PUCT_V1"
-    problem_name = "example4"
+    problem_name = "lbc_simple"
     policy_oracle_name = "gaussian"
     value_oracle_name = "deterministic"
-
     dirname = "../current/models"
 
-    # learning
-    learning_iters = 40
     # 0: weighted sum, 1: best child, 2: subsamples
     mode = 1
-    num_d_pi = 20
-    num_pi_eval = 20
-    num_d_v = 20
-    num_v_eval = 20
-    num_subsamples = 5
-    num_self_play_plots = 10
     learning_rate = 0.001
-    num_epochs = 20
     batch_size = 1028
     train_size = 0.8
 
