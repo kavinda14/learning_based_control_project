@@ -191,12 +191,15 @@ class LbcSimple(Problem):
 
                 # when robots are at same position
                 if dist_xy == 0:
+                    # set priorities to be larger
+                    ns[self.state_idxs[robot_idx][12:]] = 2 * ns[self.state_idxs[other_robot][2]]
+                    # set distances to be 0
+                    ns[self.state_idxs[robot_idx][5:13]] = 0
                     continue
 
                 angle = atan2(dist_xy[1], dist_xy[0])
                 action_region = round((angle * self.num_regions) / (2 * pi))  # get region where other robot is in
                 dist_eucl = np.linalg.norm(dist_xy)
-                # todo: robots colliding, dist_xy=0
 
                 # todo: edge case - tie-breaking using priorities when 2 agents have same proximity
                 # update current other robot to be closest
