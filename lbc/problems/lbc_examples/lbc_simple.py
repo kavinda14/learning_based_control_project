@@ -9,7 +9,7 @@ from sympy import sin, cos, atan2, pi
 
 from lbc import plotter
 from lbc.problems.problem import Problem, sample_vector
-from lbc.reward_functions import prio_reward
+from lbc.reward_functions import prio_reward, goal_reward
 
 
 def check_agents_param(num_agents: int, orig_parameter):
@@ -30,7 +30,7 @@ def scan(robot_idx, state, scan_radius):
 class LbcSimple(Problem):
 
     def __init__(self, num_agents: int = 2, num_regions: int = 8, board_size: int = 10,
-                 agent_goals: tuple = ((9, 1), (9, 9)), agent_starts: tuple = ((1, 1), (1, 9)),
+                 agent_goals: tuple = ((9, 9), (9, 1)), agent_starts: tuple = ((1, 1), (1, 9)),
                  agent_prios: tuple = (0, 1), agent_speeds: tuple = (1, 1), sensing_ranges: tuple = (4.0, 4.0)):
         """
         State space of individual agent:
@@ -46,6 +46,7 @@ class LbcSimple(Problem):
         super(LbcSimple, self).__init__()
 
         self.name = "lbc_simple"
+        self.reward_type = "priority"  # ["priority", "goal"]
         self.board_size = board_size
         self.num_robots = num_agents
         self.num_regions = num_regions
@@ -157,8 +158,14 @@ class LbcSimple(Problem):
         # todo  generalize to variable number of agents
         s_0 = state[self.state_idxs[0]]
         s_1 = state[self.state_idxs[1]]
-        r_0 = prio_reward(s_0, action)
-        r_1 = prio_reward(s_1, action)
+
+        if self.reward_type == "priority":
+            r_0 = prio_reward(s_0, action)
+            r_1 = prio_reward(s_1, action)
+        elif self.reward_type == "goal":
+            r_0 = goal_reward(s_0, action)
+            r_1 = goal_reward(s_1, action)
+
         rew = np.array([[r_0], [r_1]])
         return rew
 
