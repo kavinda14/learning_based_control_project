@@ -170,19 +170,9 @@ if __name__ == '__main__':
     x_coords1 = []
     y_coords1 = []
     x_coords2 = []
-    y_coords2 = []
-    # for sim_result in sim_results:
-    #     states = sim_result["states"]
-    #     print(len(states))
-
-    #     for i_state in states:
-    #         x_coords1.append(i_state[0])
-    #         y_coords1.append(i_state[1])
-    #         x_coords2.append(i_state[21])
-    #         y_coords2.append(i_state[22])   
+    y_coords2 = [] 
     
     states = sim_results["states"]
-    print(len(states))
 
     for i_state in states:
         x_coords1.append(i_state[0])
@@ -190,13 +180,27 @@ if __name__ == '__main__':
         x_coords2.append(i_state[21])
         y_coords2.append(i_state[22])   
 
-    print(x_coords1)
-    print(y_coords1)
-    print(x_coords2)
-    print(y_coords2)
-    plt.plot(x_coords1, y_coords1)
-    plt.plot(x_coords2, y_coords2)
-    plt.show()
+    # print(x_coords1)
+    # print(y_coords1)
+    # print(x_coords2)
+    # print(y_coords2)
+
+    print(len(states))
+    print(((len(states))-1))
+    rows = 4
+    for i in range(len(states)):
+        if (i+1 >= (len(states))-1):
+            continue
+        plt.subplot(rows, len(states)//rows, i+1)
+        plt.plot(x_coords1[0:i+1],y_coords1[0:i+1])
+        plt.plot(x_coords2[0:i+1],y_coords2[0:i+1])
+        plt.title("t{}".format(i))
+
+    plt.show() 
+
+    # plt.plot(x_coords1, y_coords1)
+    # plt.plot(x_coords2, y_coords2)
+    # plt.show()
 
     #     plotter.plot_sim_result(sim_result)
     #     sim_result["instance"]["problem"].render(states=sim_result["states"])
