@@ -1,5 +1,5 @@
 """
-3d double integrator , multi robot uncooperative target
+
 """
 from collections import Counter
 import copy
@@ -26,12 +26,12 @@ def scan(robot_idx, state, scan_radius):
     # todo
     return
 
-
 class LbcSimple(Problem):
 
-    def __init__(self, num_agents: int = 2, num_regions: int = 8, board_size: int = 10,
-                 agent_goals: tuple = ((9, 9), (9, 1)), agent_starts: tuple = ((1, 1), (1, 9)),
-                 agent_prios: tuple = (0, 1), agent_speeds: tuple = (1, 1), sensing_ranges: tuple = (4.0, 4.0)):
+    def __init__(self, num_agents: int = 2, num_regions: int = 8, board_size: int = 10, collision_range: float = 1,
+                 reward_type: str = 'priority', agent_goals: tuple = ((9, 9), (9, 1)),
+                 agent_starts: tuple = ((1, 1), (1, 9)), agent_prios: tuple = (0, 1), agent_speeds: tuple = (1, 1),
+                 sensing_ranges: tuple = (4.0, 4.0)):
         """
         State space of individual agent:
             s[0], s[1]:                         location of agent
@@ -45,20 +45,25 @@ class LbcSimple(Problem):
         """
         super(LbcSimple, self).__init__()
 
+        reward_map = {
+            'priority': prio_reward,
+            'goal': goal_reward
+        }
         self.name = "lbc_simple"
-        self.reward_type = "priority"  # ["priority", "goal"]
+        self.reward_func = reward_map.get(reward_type, prio_reward)
         self.board_size = board_size
+        self.collision_range = collision_range
         self.num_robots = num_agents
         self.num_regions = num_regions
         self.robot_prios = check_agents_param(num_agents, agent_prios)
         self.sensing_ranges = check_agents_param(num_agents, sensing_ranges)
         self.robot_speeds = check_agents_param(num_agents, agent_speeds)
-        # todo  terminal state is when all agents have reached their goal
         self.robot_goals = check_agents_param(num_agents, agent_goals)
         self.robot_start_locs = check_agents_param(num_agents, agent_starts)
 
-        # todo  need to add concept of an obstacle
-        #       regions in the space that are not valid locations (need to alter self.isvalid
+        # todo  terminal state is when all agents have reached their goal
+        # todo  add concept of an obstacle
+        #       regions in the space that are not valid locations (need to alter self.isvalid)
         self.obstacles = []
 
         self.t0 = 0
@@ -117,14 +122,7 @@ class LbcSimple(Problem):
     def sample_state(self):
         return sample_vector(self.state_lims)
 
-    def initialize(self):
-        # todo generalize starting/goal positions based on number of agents
-        #   1: 1/2
-        #   2: 1/3, 2/3
-        #   3: 1/4, 2/4, 3/4
-        #   4: 1/5, 2/5, 3/5, 4/5
-        #   ...
-        #   ...
+    def initialize_simple(self):
         a0_start = self.robot_start_locs[0]
         a0_goal = self.robot_goals[0]
         a0_prio = self.robot_prios[0]
@@ -133,8 +131,8 @@ class LbcSimple(Problem):
         a1_goal = self.robot_goals[1]
         a1_prio = self.robot_prios[1]
 
-        region_dists = [1.0] * self.num_regions
-        region_prios = [0] * self.num_regions
+        region_dists = [1.0 for _ in self.num_regions]
+        region_prios = [0 for _ in self.num_regions]
         # These two lines can be used to test these entries in the state spaces as they will
         # create distinct values rather than all 0's
         # region_dists = np.arange(start=0, stop=self.num_regions, step=1)
@@ -152,27 +150,57 @@ class LbcSimple(Problem):
             region_dists,
             region_prios,
         ))
-        return start_state.astype('float')
+        start_state = start_state.astype('float')
+        return start_state
+
+    def initialize_obstacle(self):
+        # todo
+        return None
+
+    def initialize_multiple(self):
+        # todo generalize starting/goal positions based on number of agents
+        #   1: 1/2
+        #   2: 1/3, 2/3
+        #   3: 1/4, 2/4, 3/4
+        #   4: 1/5, 2/5, 3/5, 4/5
+        #   ...
+        #   ...
+        return None
+
+    def initialize(self, seed=None):
+        state_map = {
+            1: self.initialize_simple,
+        }
+        if isinstance(seed, int):
+            start_state = state_map.get(seed, state_map[1])
+        else:
+            start_state = self.sample_state()
+        return start_state
 
     def reward(self, state, action):
-        # todo  generalize to variable number of agents
-        s_0 = state[self.state_idxs[0]]
-        s_1 = state[self.state_idxs[1]]
-
-        if self.reward_type == "priority":
-            r_0 = prio_reward(s_0, action)
-            r_1 = prio_reward(s_1, action)
-        elif self.reward_type == "goal":
-            r_0 = goal_reward(s_0, action)
-            r_1 = goal_reward(s_1, action)
-
-        rew = np.array([[r_0], [r_1]])
+        rew = []
+        for robot_idx in range(self.num_robots):
+            rob_state = state[self.state_idxs[robot_idx]]
+            rob_action = action[self.action_idxs[robot_idx]]
+            rob_rew = self.reward_func(rob_state, rob_action)
+            rew.append([rob_rew])
+        rew = np.array(rew)
+        # s_1 = state[self.state_idxs[1]]
+        # r_1 = self.reward_func(s_1, action)
+        # if self.reward_func == "priority":
+        #     r_0 = prio_reward(s_0, action)
+        #     r_1 = prio_reward(s_1, action)
+        # elif self.reward_type == "goal":
+        #     r_0 = goal_reward(s_0, action)
+        #     r_1 = goal_reward(s_1, action)
+        # rew = np.array([[r_0], [r_1]])
         return rew
 
     def normalized_reward(self, state, action):
         return self.reward(state, action)
 
     def step(self, s, a, dt):
+        # todo if agent is at goal (or nearby), do not move
         ns = copy.deepcopy(s)
         # update robot positions based on action
         for robot_idx in range(self.num_robots):
@@ -264,13 +292,44 @@ class LbcSimple(Problem):
         return fig, ax
 
     def is_terminal(self, state):
-        # todo  all agents at goal
-        all_goal = False
-        valid_state = not self.is_valid(state)
-        # todo  check collision
+        at_goal = [False for _ in range(self.num_robots)]
+        agent_collision = [False for _ in range(self.num_robots)]
+        obstacle_collision = [False for _ in range(self.num_robots)]
 
-        term_criteria = [valid_state, not all_goal]
-        return all(term_criteria)
+        for robot_idx in range(self.num_robots):
+            robot_state = state[self.state_idxs[robot_idx]]
+            robot_pos = robot_state[0:2]
+            robot_goal = robot_state[3:5]
+            dist_goal = np.linalg.norm(robot_pos - robot_goal)
+            if dist_goal <= self.collision_range:
+                at_goal[robot_idx] = True
+
+        for robot_idx in range(self.num_robots):
+            robot_state = state[self.state_idxs[robot_idx]]
+            robot_pos = robot_state[0:2]
+            for other_robot in range(self.num_robots):
+                if other_robot == robot_idx:
+                    continue
+                other_state = state[self.state_idxs[other_robot]]
+                other_pos = other_state[0:2]
+                robot_dist = np.linalg.norm(robot_pos - other_pos)
+                if robot_dist <= self.collision_range:
+                    agent_collision[robot_idx] = True
+                    agent_collision[other_robot] = True
+
+        for robot_idx in range(self.num_robots):
+            robot_state = state[self.state_idxs[robot_idx]]
+            robot_pos = robot_state[0:2]
+            for each_obstacle in self.obstacles:
+                obstacle_dist = np.linalg.norm(robot_pos - each_obstacle)
+                if obstacle_dist <= self.collision_range:
+                    obstacle_collision[robot_idx] = True
+
+        all_goal = all(at_goal)
+        any_collision = any(agent_collision.extend(obstacle_collision))
+        valid_state = not self.is_valid(state)
+        term_criteria = [not valid_state, all_goal, any_collision]
+        return any(term_criteria)
 
     def is_valid(self, state):
         # todo  clean logic
