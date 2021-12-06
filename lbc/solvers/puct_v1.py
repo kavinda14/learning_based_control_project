@@ -91,7 +91,6 @@ class PUCT_V1(Solver):
         return value
 
     def search(self, problem: Problem, root_state, turn=0):
-
         # init tree
         root_node = Node(root_state, None, problem.num_robots)
         root_node.success = False

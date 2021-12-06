@@ -324,13 +324,13 @@ def self_play(problem: Problem, policy_oracle, value_oracle, learning_idx, num_s
 
 def main():
     search_depth = 25
-    learning_iters = 100
-    num_simulations = 100
-    num_epochs = 100
-    num_d_pi = 100
-    num_d_v = 100
-    num_pi_eval = 100
-    num_v_eval = 100
+    learning_iters = 10
+    num_simulations = 10
+    num_epochs = 10
+    num_d_pi = 10
+    num_d_v = 10
+    num_pi_eval = 10
+    num_v_eval = 10
     num_subsamples = 50
 
     c_pw = 2.0

@@ -61,10 +61,8 @@ class LbcSimple(Problem):
         self.robot_goals = check_agents_param(num_agents, agent_goals)
         self.robot_start_locs = check_agents_param(num_agents, agent_starts)
 
-        # todo  terminal state is when all agents have reached their goal
-        # todo  add concept of an obstacle
-        #       regions in the space that are not valid locations (need to alter self.isvalid)
-        self.obstacles = []
+        # todo obstacles special type of agent that cannot move
+        self.obstacle_indices = []
 
         self.t0 = 0
         self.tf = 50
@@ -120,6 +118,7 @@ class LbcSimple(Problem):
         return np.rint(sample_vector(self.action_lims))
 
     def sample_state(self):
+        # todo alter state objects that should be immutable (goal and priorities)
         return sample_vector(self.state_lims)
 
     def initialize_simple(self):
@@ -131,8 +130,8 @@ class LbcSimple(Problem):
         a1_goal = self.robot_goals[1]
         a1_prio = self.robot_prios[1]
 
-        region_dists = [1.0 for _ in self.num_regions]
-        region_prios = [0 for _ in self.num_regions]
+        region_dists = [1.0 for _ in range(self.num_regions)]
+        region_prios = [0 for _ in range(self.num_regions)]
         # These two lines can be used to test these entries in the state spaces as they will
         # create distinct values rather than all 0's
         # region_dists = np.arange(start=0, stop=self.num_regions, step=1)
@@ -154,7 +153,7 @@ class LbcSimple(Problem):
         return start_state
 
     def initialize_obstacle(self):
-        # todo obstacle initial state
+        # todo obstacle problem initial state
         return None
 
     def initialize_multiple(self):
@@ -171,8 +170,9 @@ class LbcSimple(Problem):
         state_map = {
             1: self.initialize_simple,
         }
+        seed = 1
         if isinstance(seed, int):
-            start_state = state_map.get(seed, state_map[1])
+            start_state = state_map.get(seed, state_map[1])()
         else:
             start_state = self.sample_state()
         return start_state
@@ -200,13 +200,16 @@ class LbcSimple(Problem):
         return self.reward(state, action)
 
     def step(self, s, a, dt):
-        # todo if agent is at goal (or nearby), do not move
         ns = copy.deepcopy(s)
         # update robot positions based on action
         for robot_idx in range(self.num_robots):
-            # todo  can't move into obstacles
+            robot_state = s[self.state_idxs[robot_idx]]
+            robot_pos = robot_state[0:2]
+            robot_goal = robot_state[3:5]
+            dist_goal = np.linalg.norm(robot_pos - robot_goal)
             action = a[robot_idx]
-            if action == 0:
+            # if agent is at goal, do not move
+            if any((robot_idx in self.obstacle_indices, action == 0, dist_goal <= self.collision_range)):
                 continue
             angle = action * (2 * pi / self.num_regions)
             dx = self.robot_speeds[robot_idx] * cos(angle[0])
@@ -317,18 +320,14 @@ class LbcSimple(Problem):
                     agent_collision[robot_idx] = True
                     agent_collision[other_robot] = True
 
-        for robot_idx in range(self.num_robots):
-            robot_state = state[self.state_idxs[robot_idx]]
-            robot_pos = robot_state[0:2]
-            for each_obstacle in self.obstacles:
-                obstacle_dist = np.linalg.norm(robot_pos - each_obstacle)
-                if obstacle_dist <= self.collision_range:
-                    obstacle_collision[robot_idx] = True
-
         all_goal = all(at_goal)
-        any_collision = any(agent_collision.extend(obstacle_collision))
+        any_collision = any(agent_collision)
         valid_state = not self.is_valid(state)
-        term_criteria = [not valid_state, all_goal, any_collision]
+        term_criteria = [
+            not valid_state,
+            all_goal,
+            any_collision
+        ]
         return any(term_criteria)
 
     def is_valid(self, state):
