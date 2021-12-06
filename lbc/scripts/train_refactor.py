@@ -48,6 +48,7 @@ def worker_edp(seed, fn, problem: Problem, robot, num_per_pool, solver, mode, nu
                     datapoint = np.append(encoding, target)
                     datapoints.append(datapoint)
             count += 1
+            print(f'policy count: {count}/{num_per_pool}')
             # pbar.update(1)
     np.save(fn, np.array(datapoints))
     return datapoints
@@ -106,6 +107,7 @@ def worker_edv(fn, seed, problem: Problem, num_states_per_pool, policy_oracle):
         encoding = problem.value_encoding(state).squeeze()
         datapoint = np.append(encoding, value)
         datapoints.append(datapoint)
+        print(f'policy count: {len(datapoints)}/{num_states_per_pool}')
         # pbar.update(1)
     np.save(fn, np.array(datapoints))
     return datapoints
@@ -324,13 +326,13 @@ def self_play(problem: Problem, policy_oracle, value_oracle, learning_idx, num_s
 
 def main():
     search_depth = 25
-    learning_iters = 10
-    num_simulations = 10
-    num_epochs = 10
+    learning_iters = 100
+    num_simulations = 100
+    num_epochs = 100
     num_d_pi = 10
     num_d_v = 10
-    num_pi_eval = 10
-    num_v_eval = 10
+    num_pi_eval = 20
+    num_v_eval = 20
     num_subsamples = 50
 
     c_pw = 2.0
