@@ -7,7 +7,7 @@ from lbc.problems.problem import Problem
 
 class DeterministicPolicyNetwork(torch.nn.Module):
 
-    def __init__(self, problem: Problem, device="cuda", path=None, output_dim=None):
+    def __init__(self, problem: Problem, path=None, output_dim=None):
         super(DeterministicPolicyNetwork, self).__init__()
 
         self.encoding_dim = problem.policy_encoding_dim

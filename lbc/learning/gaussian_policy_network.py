@@ -6,7 +6,7 @@ from lbc.problems.problem import Problem
 
 class GaussianPolicyNetwork(torch.nn.Module):
 
-    def __init__(self, problem: Problem, robot, device="cuda", path=None):
+    def __init__(self, problem: Problem, robot, path=None):
         super(GaussianPolicyNetwork, self).__init__()
 
         h = 24
