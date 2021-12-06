@@ -325,12 +325,12 @@ def self_play(problem: Problem, policy_oracle, value_oracle, learning_idx, num_s
 
 
 def main():
-    search_depth = 25
-    learning_iters = 100
+    search_depth = 15
+    learning_iters = 10
     num_simulations = 100
     num_epochs = 100
-    num_d_pi = 10
-    num_d_v = 10
+    num_d_pi = 15
+    num_d_v = 15
     num_pi_eval = 20
     num_v_eval = 20
     num_subsamples = 50
@@ -361,9 +361,9 @@ def main():
     num_d_pi_samples = num_d_pi
     if mode == 2:
         num_d_pi_samples = num_d_pi * num_subsamples
-    # if batch_size > np.min((num_d_pi_samples, num_d_v)) * (1 - train_size):
-    #     batch_size = int(np.floor((np.min((num_d_pi_samples, num_d_v)) * train_size / 10)))
-    #     print(f'changing batch size to {batch_size}')
+    if batch_size > np.min((num_d_pi_samples, num_d_v)) * (1 - train_size):
+        batch_size = int(np.floor((np.min((num_d_pi_samples, num_d_v)) * train_size / 10)))
+        print(f'changing batch size to {batch_size}')
 
     # training
     for learning_idx in range(learning_iters):

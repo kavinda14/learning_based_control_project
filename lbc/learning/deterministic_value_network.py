@@ -7,7 +7,7 @@ from lbc.problems.problem import Problem
 
 class DeterministicValueNetwork(torch.nn.Module):
 
-    def __init__(self, problem: Problem, device="cpu", path=None):
+    def __init__(self, problem: Problem, device="cuda", path=None):
         super(DeterministicValueNetwork, self).__init__()
 
         self.encoding_dim = problem.value_encoding_dim

@@ -322,7 +322,7 @@ class LbcSimple(Problem):
 
         all_goal = all(at_goal)
         any_collision = any(agent_collision)
-        valid_state = not self.is_valid(state)
+        valid_state = self.is_valid(state)
         term_criteria = [
             not valid_state,
             all_goal,
