@@ -23,7 +23,7 @@ def check_agents_param(num_agents: int, orig_parameter):
 
 
 def scan(robot_idx, state, scan_radius):
-    # todo
+    # todo scan area around robot (simplify logic and break out for testing)
     return
 
 class LbcSimple(Problem):
@@ -154,7 +154,7 @@ class LbcSimple(Problem):
         return start_state
 
     def initialize_obstacle(self):
-        # todo
+        # todo obstacle initial state
         return None
 
     def initialize_multiple(self):
@@ -342,11 +342,11 @@ class LbcSimple(Problem):
         return state
 
     def plot_policy_dataset(self, dataset, title, robot):
-        # todo
+        # todo plot policy dataset
         pass
 
     def plot_value_dataset(self, dataset, title):
-        # todo
+        # todo plot value dataset
         pass
 
 
@@ -391,7 +391,7 @@ if __name__ == '__main__':
         print(f'Reward of agent0 taking action {each_action}: {next_reward[0]}')
     ########################################
     # Test scan
-    # todo
+    # todo test scan
     ########################################
     # Test step
-    # todo
+    # todo test step
