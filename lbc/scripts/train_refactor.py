@@ -361,9 +361,9 @@ def main():
     num_d_pi_samples = num_d_pi
     if mode == 2:
         num_d_pi_samples = num_d_pi * num_subsamples
-    if batch_size > np.min((num_d_pi_samples, num_d_v)) * (1 - train_size):
-        batch_size = int(np.floor((np.min((num_d_pi_samples, num_d_v)) * train_size / 10)))
-        print(f'changing batch size to {batch_size}')
+    # if batch_size > np.min((num_d_pi_samples, num_d_v)) * (1 - train_size):
+    #     batch_size = int(np.floor((np.min((num_d_pi_samples, num_d_v)) * train_size / 10)))
+    #     print(f'changing batch size to {batch_size}')
 
     # training
     for learning_idx in range(learning_iters):
