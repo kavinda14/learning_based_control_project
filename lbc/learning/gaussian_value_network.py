@@ -7,7 +7,7 @@ from lbc.problems.problem import Problem
 
 class GaussianValueNetwork(torch.nn.Module):
 
-    def __init__(self, problem: Problem, path=None):
+    def __init__(self, problem: Problem, device="cpu", path=None):
         super(GaussianValueNetwork, self).__init__()
 
         self.encoding_dim = problem.value_encoding_dim

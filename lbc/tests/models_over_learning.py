@@ -53,8 +53,8 @@ def eval_models(problem: Problem, policy_model_fns, policy_oracle_name, value_mo
     # ------------- policy ---------------
     # todo
 
-    plotter.save_figs("../current/plots/model_over_learning_iterations.pdf")
-    plotter.open_figs("../current/plots/model_over_learning_iterations.pdf")
+    plotter.save_figs("../current_bak_2/plots/model_over_learning_iterations.pdf")
+    plotter.open_figs("../current_bak_2/plots/model_over_learning_iterations.pdf")
 
 
 def main():
@@ -68,13 +68,13 @@ def main():
 
     problem = get_problem(problem_name)
     value_model_fns = [
-        "/home/ben/projects/decision_making/current/models/model_value_l{}.pt".format(l) for l in range(num_iterations)
+        "/home/ben/projects/decision_making/current_bak_2/models/model_value_l{}.pt".format(l) for l in range(num_iterations)
     ]
 
     policy_model_fns = []
     for i in range(num_robots):
         policy_model_fns.append(
-            ["/home/ben/projects/decision_making/current/models/model_policy_l{}_i{}.pt".format(l, i) for l in
+            ["/home/ben/projects/decision_making/current_bak_2/models/model_policy_l{}_i{}.pt".format(l, i) for l in
              range(num_iterations)])
 
     eval_models(problem, policy_model_fns, policy_oracle_name, value_model_fns, value_oracle_name, num_eval, num_robots)

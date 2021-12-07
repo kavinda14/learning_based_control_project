@@ -240,7 +240,7 @@ class LbcSimple(Problem):
                 dist_eucl = np.linalg.norm(dist_xy)
 
                 # todo: edge case - tie-breaking using priorities when 2 agents have same proximity
-                # update current other robot to be closest
+                # update current_bak_2 other robot to be closest
                 if dist_eucl < closest_dist[action_region]:
                     closest_dist[action_region] = dist_eucl
                     # update priority of closest robot in state

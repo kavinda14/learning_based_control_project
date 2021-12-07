@@ -1,5 +1,6 @@
 import os
 import time
+from pathlib import Path
 from queue import Queue
 
 import numpy as np
@@ -165,7 +166,7 @@ def calculate_value(problem: Problem, sim_result):
 
 
 def train_model(problem: Problem, train_dataset, test_dataset, learning_idx, policy_oracle_name, value_oracle_name,
-                oracle_type, learning_rate, batch_size, num_epochs, dirname, robot=0, device='cuda'):
+                oracle_type, learning_rate, batch_size, num_epochs, dirname, robot=0, device='cpu'):
     start_time = time.time()
     print('training model...')
 
@@ -351,6 +352,7 @@ def main():
     solver_name = "PUCT_V1"
     policy_oracle_name = "gaussian"
     value_oracle_name = "deterministic"
+    reward_type = 'priority'
 
     # 0: weighted sum, 1: best child, 2: subsamples
     mode = 1
@@ -360,9 +362,14 @@ def main():
     train_size = 0.8
 
     problem_name = "lbc_simple"
-    dirname = "../current/models"
+    # f"../current/{reward_type}/models"
+    dirname = Path('current', reward_type, 'models')
+    if not dirname.exists():
+        dirname.mkdir(parents=True, exist_ok=True)
+    dirname = str(dirname.absolute())
+    print(f'Saving training results to "{dirname}"')
 
-    problem: Problem = get_problem(problem_name)
+    problem: Problem = get_problem(problem_name, **{'reward_type': reward_type})
     format_dir(clean_dirnames=["data", "models"])
 
     num_d_pi_samples = num_d_pi

@@ -4,7 +4,7 @@ import torch
 
 class FeedForward(nn.Module):
 
-    def __init__(self, layers, activation):
+    def __init__(self, layers, activation, device="cpu"):
         super(FeedForward, self).__init__()
 
         self.layers = nn.ModuleList()

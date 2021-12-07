@@ -14,8 +14,8 @@ class Param:
 
         # oracles
         oracles_on = True
-        # dirname = f"../current/models"
-        dirname = str(Path('current', 'models'))
+        # dirname = f"../current_bak_2/models"
+        dirname = str(Path('current_bak_2', 'models'))
         # dirname = "/home/ben/projects/decision_making/saved/example9"
         # dirname = "/home/ben/projects/decision_making/saved/example6"
 

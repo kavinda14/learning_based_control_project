@@ -29,7 +29,7 @@ problem_name = "example6"
 policy_oracle_name = "gaussian"
 value_oracle_name = "deterministic"
 
-dirname = "../current/models"
+dirname = "../current_bak_2/models"
 
 # learning 
 L = 40

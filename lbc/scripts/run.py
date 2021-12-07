@@ -166,13 +166,13 @@ if __name__ == '__main__':
 
     if param.movie_on:
         print('making movie...')
-        plotter.make_movie(sim_results[0], sim_results[0]["instance"], "../current/plots/vid.mp4")
-        plotter.open_figs("../current/plots/vid.mp4")
+        plotter.make_movie(sim_results[0], sim_results[0]["instance"], "../current_bak_2/plots/vid.mp4")
+        plotter.open_figs("../current_bak_2/plots/vid.mp4")
 
     #     plotter.plot_sim_result(sim_result)
     #     sim_result["instance"]["problem"].render(states=sim_result["states"])
     #     if param.pretty_plot_on and hasattr(sim_result["instance"]["problem"], 'pretty_plot'):
     #         sim_result["instance"]["problem"].pretty_plot(sim_result)
 
-    # plotter.save_figs("../current/plots/run.pdf")
-    # plotter.open_figs("../current/plots/run.pdf")
+    # plotter.save_figs("../current_bak_2/plots/run.pdf")
+    # plotter.open_figs("../current_bak_2/plots/run.pdf")
