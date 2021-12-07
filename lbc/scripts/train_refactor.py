@@ -444,7 +444,7 @@ def main(main_args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='')
 
-    parser.add_argument('--reward_type', type=str, default='nothing')
+    parser.add_argument('--reward_type', type=str, default='priority')
     parser.add_argument('--search_depth', type=int, default=25)
 
     args = parser.parse_args()
