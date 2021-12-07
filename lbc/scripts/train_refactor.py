@@ -54,6 +54,7 @@ def worker_edp(seed, fn, problem: Problem, robot, num_per_pool, solver, mode, nu
                 print('\b' * len(old_update_str), end='')
             print(update_str, end='')
             old_update_str = update_str
+    print()
     np.save(fn, np.array(datapoints))
     return datapoints
 
@@ -117,6 +118,7 @@ def worker_edv(fn, seed, problem: Problem, num_states_per_pool, policy_oracle):
             print('\b' * len(old_update_str), end='')
         print(update_str, end='')
         old_update_str = update_str
+    print()
     np.save(fn, np.array(datapoints))
     return datapoints
 
