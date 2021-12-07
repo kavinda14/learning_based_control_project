@@ -1,3 +1,4 @@
+import argparse
 import os
 import time
 from pathlib import Path
@@ -334,8 +335,10 @@ def self_play(problem: Problem, policy_oracle, value_oracle, learning_idx, num_s
     return sim_results
 
 
-def main():
-    search_depth = 25
+def main(main_args):
+    search_depth = main_args.get('search_depth', 25)
+    reward_type = main_args.get('reward_type', 'priority')
+
     learning_iters = 100
     num_simulations = 100
     num_epochs = 100
@@ -354,7 +357,6 @@ def main():
     solver_name = "PUCT_V1"
     policy_oracle_name = "gaussian"
     value_oracle_name = "deterministic"
-    reward_type = 'priority'
 
     # 0: weighted sum, 1: best child, 2: subsamples
     mode = 1
@@ -364,14 +366,19 @@ def main():
     train_size = 0.8
 
     problem_name = "lbc_simple"
-    # f"../current/{reward_type}/models"
-    dirname = Path('current', reward_type, 'models')
+    problem: Problem = get_problem(problem_name, **{'reward_type': reward_type})
+    dirname = Path('current', problem.reward_func.__name__, 'models')
     if not dirname.exists():
         dirname.mkdir(parents=True, exist_ok=True)
     dirname = str(dirname.absolute())
+    # #######################################################
+    print('-' * 80)
+    print(f'Search depth set to: {search_depth}')
+    print(f'Reward type specified as: {reward_type}')
+    print(f'Reward type set to:       {problem.reward_func.__name__}')
     print(f'Saving training results to "{dirname}"')
+    print('-' * 80)
 
-    problem: Problem = get_problem(problem_name, **{'reward_type': reward_type})
     format_dir(clean_dirnames=["data", "models"])
 
     num_d_pi_samples = num_d_pi
@@ -435,4 +442,11 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description='')
+
+    parser.add_argument('--reward_type', type=str, default='nothing')
+    parser.add_argument('--search_depth', type=int, default=25)
+
+    args = parser.parse_args()
+
+    main(vars(args))
