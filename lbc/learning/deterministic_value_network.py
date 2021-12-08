@@ -54,7 +54,8 @@ class DeterministicValueNetwork(torch.nn.Module):
 
     def eval(self, problem, root_state):
         value_encoding = problem.value_encoding(root_state)
-        value_encoding = torch.tensor(value_encoding, dtype=torch.float32).squeeze().unsqueeze(
-            0)  # [batch_size x state_dim]
-        value = self.__call__(value_encoding).detach().numpy().reshape(problem.num_robots, 1)  # [num_robots x 1]
+        # [batch_size x state_dim]
+        value_encoding = torch.tensor(value_encoding, dtype=torch.float32).squeeze().unsqueeze(0)
+        # [num_robots x 1]
+        value = self.__call__(value_encoding).detach().numpy().reshape(problem.num_robots, 1)
         return value

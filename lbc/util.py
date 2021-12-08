@@ -42,7 +42,6 @@ PROBLEM_MAP = {
 
 SOLVER_MAP = {
     'puct_v1': PUCT_V1,
-    # 'NeuralNetwork': PolicySolver
     'neuralnetwork': PolicySolver
 }
 
@@ -67,7 +66,6 @@ def get_solver(solver_name, vis_on=False, **kwargs):
     :return:
     """
     solver = SOLVER_MAP[solver_name.lower()]
-    # solver = SOLVER_MAP[solver_name]
     solver = solver(**kwargs)
     return solver
 
@@ -106,7 +104,6 @@ def write_dataset(dataset, fn):
 
 
 def get_dataset_fn(oracle_name, l, robot=0):
-    # return "../current_bak_2/data/{}_l{}_i{}.pickle".format(oracle,l,robot)
     return "../current_bak_2/data/{}_l{}_i{}.npy".format(oracle_name, l, robot)
 
 
