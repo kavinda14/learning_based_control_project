@@ -13,9 +13,10 @@
 __pycache__/
 .vscode/
 
-
 **__pycache__**
 **/build/**
 **/.vscode/**
-current/**
-saved/**
+**/current_bak_2
+**/current_bak
+**/saved
+/lbc.egg-info/

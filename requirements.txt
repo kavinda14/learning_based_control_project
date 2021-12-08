@@ -1,0 +1,9 @@
+matplotlib
+numpy
+pandas
+torch
+scipy
+tqdm
+setuptools
+PyPDF2
+sympy

@@ -1,120 +1,100 @@
+import abc
+from abc import ABC
 
-from util import sample_vector
-
-class Problem: 
-
-	def __init__(self):
-		self.num_robots = None
-		self.gamma = None
-		self.state_dim = None 
-		self.state_lims = None 
-		self.action_dim = None
-		self.action_lims = None 
-		self.position_idx = None 
-		self.dt = None
-		self.times = None  
-		self.policy_encoding_dim = None
-		self.value_encoding_dim = None
-		self.name = None
-
-	def sample_action(self):
-		return sample_vector(self.action_lims)
-
-	def sample_state(self):
-		return sample_vector(self.state_lims)
-
-	def initialize(self):
-		valid = False
-		while not valid:
-			state = sample_vector(self.init_lims)
-			valid = not self.is_terminal(state)
-		return state
-
-	def reward(self,state,action):
-		exit("reward needs to be overwritten")
-
-	def normalized_reward(self,state,action): 
-		exit("normalized_reward needs to be overwritten")		
-
-	def step(self,state,action):
-		exit("step needs to be overwritten")
-
-	def render(self,states):
-		exit("render needs to be overwritten")
-
-	def is_terminal(self,state):
-		exit("is_terminal needs to be overwritten")
-
-	def policy_encoding(self,state,robot):
-		exit("policy_encoding needs to be overwritten")		
-
-	def value_encoding(self,state):
-		exit("value_encoding needs to be overwritten")
-
-	def render(self,states):
-		exit("render needs to be overwritten")
+import numpy as np
 
 
-def get_problem(problem_name):
+# noinspection PyUnresolvedReferences
+def contains(vector, lims):
+    return (vector[:, 0] >= lims[:, 0]).all() and (vector[:, 0] <= lims[:, 1]).all()
 
-	# 2d single integrator regulator
-	if problem_name == "example1":
-		from problems.example1 import Example1
-		problem = Example1()
 
-	# 2d double integrator regulator
-	elif problem_name == "example2":
-		from problems.example2 import Example2
-		problem = Example2()
+def sample_vector(lims, damp=0.0):
+    # from cube
+    dim = lims.shape[0]
+    x = np.zeros((dim, 1))
+    for i in range(dim):
+        x[i] = lims[i, 0] + np.random.uniform(damp, 1 - damp) * (lims[i, 1] - lims[i, 0])
+    return x
 
-	# 3d dubins uncooperative tracking 
-	elif problem_name == "example3":
-		from problems.example3 import Example3
-		problem = Example3()
 
-	# 3d double integrator uncooperative tracking 
-	elif problem_name == "example4":
-		from problems.example4 import Example4
-		problem = Example4() 
+class Problem(ABC):
 
-	# game of atrition 
-	elif problem_name == "example5":
-		from problems.example5 import Example5
-		problem = Example5()
+    def __init__(self):
+        self.name = None
+        self.reward_func = None
+        self.num_robots = None
+        self.gamma = None
 
-	# bugtrap: 2d single integrator with obstacles 
-	elif problem_name == "example6":
-		from problems.example6 import Example6
-		problem = Example6() 
+        self.state_dim = None
+        self.action_dim = None
 
-	# 2d double integrator uncooperative tracking 
-	elif problem_name == "example7":
-		from problems.example7 import Example7
-		problem = Example7() 
+        self.policy_encoding_dim = None
+        self.value_encoding_dim = None
 
-	# 2d single integrator pursuit evasion 
-	elif problem_name == "example8":
-		from problems.example8 import Example8
-		problem = Example8() 
+        self.state_lims = None
+        self.action_lims = None
+        self.init_lims = None
 
-	# homicidal chauffeur problem
-	elif problem_name == "example9":
-		from problems.example9 import Example9
-		problem = Example9() 
+        # position, state, and action idxs are meant as a way to extract information about each individual agent
+        # from the full state/action/position vectors
+        #   s[state_idxs[0]] is the state vector for the first agent
+        #   s[state_idxs[1]] is the state vector for the second agent
+        #   ...
+        #   ...
+        self.position_idx = None
+        self.state_idxs = None
+        self.action_idxs = None
 
-	# dummy game problem 
-	elif problem_name == "example10":
-		from problems.example10 import Example10
-		problem = Example10() 
+        self.dt = None
+        return
 
-	# multiscale bugtrap: 2d single integrator with obstacles 
-	elif problem_name == "example11":
-		from problems.example11 import Example11
-		problem = Example11() 
+    def sample_action(self):
+        return sample_vector(self.action_lims)
 
-	# modified homicidal chauffer  
-	elif problem_name == "example12":
-		from problems.example12 import Example12
-		problem = Example12() 
+    def sample_state(self):
+        return sample_vector(self.state_lims)
 
-	return problem 
+    def initialize(self):
+        valid = False
+        state = None
+        while not valid:
+            state = sample_vector(self.init_lims)
+            valid = not self.is_terminal(state)
+        return state
+
+    @abc.abstractmethod
+    def reward(self, state, action):
+        pass
+
+    @abc.abstractmethod
+    def normalized_reward(self, state, action):
+        pass
+
+    @abc.abstractmethod
+    def step(self, state, action, dt):
+        pass
+
+    @abc.abstractmethod
+    def render(self, states):
+        pass
+
+    @abc.abstractmethod
+    def is_terminal(self, state):
+        pass
+
+    @abc.abstractmethod
+    def policy_encoding(self, state, robot):
+        pass
+
+    @abc.abstractmethod
+    def value_encoding(self, state):
+        pass
+
+    @abc.abstractmethod
+    def plot_policy_dataset(self, dataset, title, robot):
+        pass
+
+    @abc.abstractmethod
+    def plot_value_dataset(self, dataset, title):
+        pass

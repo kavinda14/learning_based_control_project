@@ -1,25 +1,34 @@
+Learning Based Control
+=====
 
-This repository contains code for the following publication, please cite our work if you use this repo:
+## Overview
+
+This repository is an extension of the code found at `https://github.com/bpriviere/decision_making`.
 
 B. Riviere, W. Hönig, M. Anderson, S-J. Chung. "Neural Tree Expansion for Multi-Robot Planning in Non-Cooperative Environments" in IEEE Robotics and Automation Letters (RA-L) June 2021. 
 
+This project is aimed at allowing for explicit prioritization for different agents in multi-agent path deconfliction.
 
 ## Dependencies:
-Developed on Ubuntu 20.04. Python dependencies in `~/environment.yml`, can be batch installed with: 
+
+This project should be installed into a virtual environment using the following command:
 
 ```
-conda env create -f environment.yml
+pip install -e .
 ```
-If package install fails, try removing specific versions in `.yml` file: e.g. if 
-```
-ResolvePackageNotFound: 
-  - libgfortran-ng==7.5.0=hdf63c60_6
-```  
-change `libgfortran-ng==7.5.0=hdf63c60_6` to `libgfortran-ng=7.5.0`. 
 
-Then:
+If this fails, remove the offending entry from `requirements.txt` and try again.
+
+Due to `pytorch` having further dependencies and run configurations, that package is best installed individually. For instance, if running on Windows, , pip, and cuda 11.3, the command is as follows:
+
 ```
-conda activate dm_env
+pip3 install torch==1.10.0+cu113 torchvision==0.11.1+cu113 torchaudio===0.10.0+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html
+```
+
+Refer to the `pytorch` documentation for more information regarind install configurations. 
+
+```
+https://pytorch.org/get-started/locally/
 ```
 
 ## Compiling:
